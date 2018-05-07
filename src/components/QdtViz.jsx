@@ -49,6 +49,10 @@ export default class QdtViz extends React.Component {
     this.close();
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    alert('should');
+    return true;
+  }
   componentWillUnmount() {
     this.close();
   }
