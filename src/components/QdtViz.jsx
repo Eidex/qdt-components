@@ -40,6 +40,8 @@ export default class QdtViz extends React.Component {
   }
 
   componentWillReceiveProps(newProps) {
+    console.log(this.props.options);
+    console.log(newProps.options);
     if (JSON.stringify(newProps.options) !== JSON.stringify(this.props.options)) {
       this.setOptions(newProps.options);
     }
@@ -79,6 +81,7 @@ export default class QdtViz extends React.Component {
       if (qViz) {
         await this.setState({ loading: false });
         qViz.show(this.node);
+        this.resize();
       } else {
         throw new Error('Please specify a qConfig global variable');
       }
