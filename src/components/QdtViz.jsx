@@ -57,6 +57,7 @@ export default class QdtViz extends React.Component {
     try {
       const qViz = await this.qVizPromise;
       qViz.setOptions(options);
+      qViz.resize();
     } catch (error) {
       this.setState({ error });
     }
@@ -105,7 +106,7 @@ export default class QdtViz extends React.Component {
   }
 
   render() {
-    this.resize();
+    console.log(this.props.width);
     if (this.state.error) {
       return <div>{this.state.error.message}</div>;
     } else if (this.state.loading) {
