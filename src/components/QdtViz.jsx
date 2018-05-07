@@ -42,7 +42,6 @@ export default class QdtViz extends React.Component {
   componentWillReceiveProps(newProps) {
     if (JSON.stringify(newProps.options) !== JSON.stringify(this.props.options)) {
       this.setOptions(newProps.options);
-      this.resize();
     }
     this.close();
   }
@@ -103,6 +102,7 @@ export default class QdtViz extends React.Component {
   }
 
   render() {
+    this.resize();
     if (this.state.error) {
       return <div>{this.state.error.message}</div>;
     } else if (this.state.loading) {
