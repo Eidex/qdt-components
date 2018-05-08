@@ -1,7 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 // import FontAwesome from 'react-fontawesome';
-// const ripple = require('qdt-components/assets/Ellipsis-6.2s-200px.svg');
+import Ripple2 from '../../assets/Ellipsis-6.2s-200px.svg';
+
+const ripple = require('../../assets/Ellipsis-6.2s-200px.svg');
 
 export default class QdtViz extends React.Component {
   static propTypes = {
@@ -106,7 +108,8 @@ export default class QdtViz extends React.Component {
     if (this.state.error) {
       return <div>{this.state.error.message}</div>;
     } else if (this.state.loading) {
-      return <div style={{ 'text-align': 'center', height: '200px' }}><img src="qdt-components/assets/Ellipsis-6.2s-200px.svg" /></div>;
+      alert(Ripple2);
+      return <div style={{ 'text-align': 'center', height: '200px' }}><img src="../../assets/Ellipsis-6.2s-200px.svg" /><img src={ripple} /><img src={Ripple2} /></div>;
     }
     const { width, height } = this.props;
     return <div ref={(node) => { this.node = node; }} style={{ width, height }} onClick={() => { console.log('qdt clicked!'); }} />;
