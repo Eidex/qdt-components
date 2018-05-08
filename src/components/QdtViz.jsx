@@ -110,7 +110,7 @@ export default class QdtViz extends React.Component {
       return <div>{this.state.error.message}</div>;
     } else if (this.state.loading) {
       return (<div style={{ 'text-align': 'center', height: '200px' }}><img src="../../assets/Ellipsis-6.2s-189px.gif" />
-        <div className={styles.lds - css} ><div style="width:100%;height:100%" className={styles.lds - ripple}><div /><div /></div></div>
+        <div style={{ width: '100%', height: '100%' }} className={styles.ldsripple}><div /><div /></div>
               </div>);
     }
     const { width, height } = this.props;
