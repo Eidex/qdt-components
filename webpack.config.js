@@ -69,7 +69,13 @@ module.exports = {
           use: [
             { loader: 'file-loader' }
           ]
-        }
+        },
+        { 
+          test: /\.(png|jpg|gif)$/, 
+          use: [ 
+            {loader: 'file-loader?name=images/[name]---[hash].[ext]'} 
+          ] 
+        },
     ],
   },
   plugins: [

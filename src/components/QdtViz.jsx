@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 // import FontAwesome from 'react-fontawesome';
+import gif from '../../assets/Ellipsis.gif';
 
 export default class QdtViz extends React.Component {
   static propTypes = {
@@ -105,7 +106,7 @@ export default class QdtViz extends React.Component {
     if (this.state.error) {
       return <div>{this.state.error.message}</div>;
     } else if (this.state.loading) {
-      return (<div style={{ 'text-align': 'center', height: '200px' }}><img src="Ellipsis-6.2s-189px.gif" />
+      return (<div style={{ 'text-align': 'center', height: '200px' }}><img src={gif} />
               </div>);
     }
     const { width, height } = this.props;
