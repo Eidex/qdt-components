@@ -104,9 +104,9 @@ export default class QdtViz extends React.Component {
     if (this.state.error) {
       return <div>{this.state.error.message}</div>;
     } else if (this.state.loading) {
-      return <div style={{ 'text-align': 'center', height: '200px' }}><img src="./Ellipsis-6.2s-200px.svg" alt="" /></div>;
+      return <div style={{ 'text-align': 'center', height: '200px' }}><img src="./Ellipsis-6.2s-189px.gif" alt="" /></div>;
     }
     const { width, height } = this.props;
-    return <div ref={(node) => { this.node = node; }} style={{ width, height }} onClick={() => { console.log('qdt clicked!'); }}><img src="./Ellipsis-6.2s-189px.gif" alt="" /></div>;
+    return <div ref={(node) => { this.node = node; }} style={{ width, height }} onClick={() => { console.log('qdt clicked!'); }} />;
   }
 }
