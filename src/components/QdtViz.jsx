@@ -108,7 +108,7 @@ export default class QdtViz extends React.Component {
       return (<div style={{
  display: 'flex', alignItems: 'center', 'text-align': 'center', justifyContent: 'center', height: '200px',
 }}
-      ><FontAwesome style={{ margin: 'auto', marginTop: '40px' }} name="spinner" size="100px" spin />
+      ><FontAwesome style={{ margin: 'auto', marginTop: '40px' }} name="spinner" size="5x" spin />
       </div>);
     }
     const { width, height } = this.props;
