@@ -106,10 +106,10 @@ export default class QdtViz extends React.Component {
       return <div>{this.state.error.message}</div>;
     } else if (this.state.loading) {
       return (<div style={{
- display: 'flex', alignItems: 'center', 'text-align': 'center', justifyContent: 'center', height: '200px',
+ display: 'flex', alignItems: 'center', 'text-align': 'center', justifyContent: 'center', height: this.props.height,
 }}
       ><FontAwesome style={{ margin: 'auto', marginTop: '40px' }} name="spinner" size="5x" spin />
-      </div>);
+              </div>);
     }
     const { width, height } = this.props;
     return <div ref={(node) => { this.node = node; }} style={{ width, height }} onClick={() => { console.log('qdt clicked!'); }} />;
