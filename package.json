@@ -26,10 +26,8 @@
     "picasso-plugin-q": "^0.5.3",
     "picasso.js": "^0.5.3",
     "prop-types": "^15.6.0",
-    "react": "^16.0.0",
     "react-bootstrap": "^0.32.1",
     "react-bootstrap-table": "^4.3.1",
-    "react-dom": "^16.0.0",
     "react-fontawesome": "^1.6.1"
   },
   "devDependencies": {
@@ -62,5 +60,9 @@
   "scripts": {
     "start": "webpack --watch",
     "lint": "eslint . --ignore-path .gitignore --cache"
+  },
+  "peerDependencies": {
+    "react": "^16.0.0",
+    "react-dom": "^16.0.0"
   }
 }
