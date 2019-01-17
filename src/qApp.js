@@ -1,5 +1,15 @@
+import utility from './utilities/';
+
+// let qlik;
+// let { qlik } = utility.qlobals;
+let capabilityApisPromise;
+
 const loadCapabilityApis = async (config) => {
   try {
+    if (capabilityApisPromise) {
+      await capabilityApisPromise;
+      return;
+    }
     const capabilityApisJS = document.createElement('script');
     const prefix = (config.prefix !== '') ? `/${config.prefix}` : '';
     capabilityApisJS.src = `${(config.secure ? 'https://' : 'http://') + config.host + (config.port ? `:${config.port}` : '') + prefix}/resources/assets/external/requirejs/require.js`;
@@ -15,7 +25,10 @@ const loadCapabilityApis = async (config) => {
     capabilityApisCSS.loaded = new Promise((resolve) => {
       capabilityApisCSS.onload = () => { resolve(); };
     });
-    await Promise.all([capabilityApisJS.loaded, capabilityApisCSS.loaded]);
+
+    capabilityApisPromise = Promise.all([capabilityApisJS.loaded, capabilityApisCSS.loaded]);
+
+    await capabilityApisPromise;
   } catch (error) {
     throw new Error(error);
   }
@@ -30,12 +43,28 @@ const qApp = async (config) => {
       paths: {
         qlik: `${(config.secure ? 'https://' : 'http://') + config.host + (config.port ? `:${config.port}` : '') + prefix}resources/js/qlik`,
       },
+      config: {
+        text: {
+          useXhr() {
+            return true;
+          },
+        },
+      },
     });
     return new Promise((resolve) => {
-      window.require(['js/qlik'], (qlik) => {
-        const app = qlik.openApp(config.appId, { ...config, isSecure: config.secure });
+      if (utility.globals.qlik) {
+        const app = utility.globals.qlik.openApp(config.appId, { ...config, isSecure: config.secure, prefix });
         resolve(app);
-      });
+      } else {
+        window.require(['js/qlik'], (q) => {
+          utility.globals.qlik = q;
+          utility.globals.resize = () => {
+            q.resize();
+          };
+          const app = q.openApp(config.appId, { ...config, isSecure: config.secure, prefix });
+          resolve(app);
+        });
+      }
     });
   } catch (error) {
     throw new Error(error);
