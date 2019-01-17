@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import FontAwesome from 'react-fontawesome';
+// import FontAwesome from 'react-fontawesome';
 import Preloader from '../utilities/Preloader';
 import QdtButton from './QdtButton';
 
@@ -134,14 +134,14 @@ export default class QdtViz extends React.Component {
     if (this.state.error) {
       return <div>{this.state.error.message}</div>;
     } else if (this.state.loading) {
-//       return (<div style={{
-//  display: 'flex', alignItems: 'center', 'text-align': 'center', justifyContent: 'center', height: this.props.height,
-// }}
-//       ><FontAwesome style={{ margin: 'auto', marginTop: '40px' }} name="spinner" size="5x" spin />
-//               </div>);
-//     }
-//     const { width, height } = this.props;
-//     return <div ref={(node) => { this.node = node; }} style={{ width, height }} onClick={() => { console.log('qdt clicked!'); }} />;
+      //       return (<div style={{
+      //  display: 'flex', alignItems: 'center', 'text-align': 'center', justifyContent: 'center', height: this.props.height,
+      // }}
+      //       ><FontAwesome style={{ margin: 'auto', marginTop: '40px' }} name="spinner" size="5x" spin />
+      //               </div>);
+      //     }
+      //     const { width, height } = this.props;
+      //     return <div ref={(node) => { this.node = node; }} style={{ width, height }} onClick={() => { console.log('qdt clicked!'); }} />;
     //   return <div>Loading...</div>;
       const paddingTop = (parseInt(height, 0)) ? (height / 2) - 10 : 0;
       return <Preloader width={width} height={height} paddingTop={paddingTop} />;
