@@ -1,6 +1,20 @@
+/**
+ * @name withHyperCube
+ * @param {array} cols - The dimension for the ListObject
+ * @param {object} qListObjectDef - Pass the entire Definition to bypass our creation object
+ * @param {bool} autoSortByState - IF we want the selected to be always on top like Qlik Sense. Default true
+ * @param {number} qSortByAscii [1] - For sorting the list by text. 1 = ASC, 0 = none, -1 = DESC
+ * @param {number} qSortByLoadOrder [1] - For sorting the list by Sense load. 1 = ASC, 0 = none, -1 = DESC
+ * @description
+ * Creates a Session List Object
+ * https://help.qlik.com/en-US/sense-developer/June2018/Subsystems/EngineAPI/Content/GenericObject/PropertyLevel/HyperCubeDef.htm
+ *
+*/
+
 import React from 'react';
 import autobind from 'autobind-decorator';
 import PropTypes from 'prop-types';
+import Preloader from '../utilities/Preloader';
 
 export default function withHyperCube(Component) {
   return class extends React.Component {
@@ -9,17 +23,29 @@ export default function withHyperCube(Component) {
       cols: PropTypes.array,
       qHyperCubeDef: PropTypes.object,
       qPage: PropTypes.object,
+      width: PropTypes.string,
+      height: PropTypes.string,
+      qSortByAscii: PropTypes.oneOf([1, 0, -1]),
+      qSortByLoadOrder: PropTypes.oneOf([1, 0, -1]),
+      qInterColumnSortOrder: PropTypes.array,
+      qSuppressZero: PropTypes.bool,
     };
 
     static defaultProps = {
       cols: null,
       qHyperCubeDef: null,
+      qSortByAscii: 1,
+      qSortByLoadOrder: 1,
+      qInterColumnSortOrder: [],
+      qSuppressZero: false,
       qPage: {
         qTop: 0,
         qLeft: 0,
         qWidth: 10,
         qHeight: 100,
       },
+      width: '100%',
+      height: '100%',
     }
 
     constructor(props) {
@@ -28,6 +54,7 @@ export default function withHyperCube(Component) {
         qObject: null,
         qLayout: null,
         qData: null,
+        selections: false,
         updating: false,
         error: null,
       };
@@ -36,7 +63,7 @@ export default function withHyperCube(Component) {
     async componentWillMount() {
       try {
         const { qDocPromise } = this.props;
-        const qProp = this.generateQProp();
+        const qProp = await this.generateQProp();
         const qDoc = await qDocPromise;
         const qObject = await qDoc.createSessionObject(qProp);
         qObject.on('changed', () => { this.update(); });
@@ -49,6 +76,12 @@ export default function withHyperCube(Component) {
       } finally {
         this.setState({ loading: false });
       }
+    }
+
+    async componentWillUnmount() {
+      const { qDocPromise } = this.props;
+      const qDoc = await qDocPromise;
+      qDoc.destroySessionObject(this.state.qObject.id);
     }
 
     async getLayout() {
@@ -65,31 +98,52 @@ export default function withHyperCube(Component) {
     }
 
     generateQProp() {
-      const { cols, qHyperCubeDef } = this.props;
+      const {
+        cols, qHyperCubeDef, qSortByAscii, qSortByLoadOrder, qSuppressZero,
+      } = this.props;
       const qProp = { qInfo: { qType: 'visualization' } };
       if (qHyperCubeDef) {
+        if (cols && cols[1]) qHyperCubeDef.qMeasures[0].qDef = { qDef: cols[1] };
+        if (cols && cols[0]) qHyperCubeDef.qDimensions[0].qDef.qFieldDefs = [cols[0]];
+        qProp.qInfo.qType = 'HyperCube';
         qProp.qHyperCubeDef = qHyperCubeDef;
-      } else {
-        const qDimensions = cols.filter(col =>
-          (typeof col === 'string' && !col.startsWith('=')) ||
-          (typeof col === 'object' && col.qDef && col.qDef.qFieldDefs) ||
-          (typeof col === 'object' && col.qLibraryId && col.qType && col.qType === 'dimension')).map((col) => {
-          if (typeof col === 'string') {
-            return { qDef: { qFieldDefs: [col] } };
-          }
-          return col;
-        });
-        const qMeasures = cols.filter(col =>
-          (typeof col === 'string' && col.startsWith('=')) ||
-          (typeof col === 'object' && col.qDef && col.qDef.qDef) ||
-          (typeof col === 'object' && col.qLibraryId && col.qType && col.qType === 'measure')).map((col) => {
-          if (typeof col === 'string') {
-            return { qDef: { qDef: col } };
-          }
-          return col;
-        });
-        qProp.qHyperCubeDef = { qDimensions, qMeasures };
+        return qProp;
       }
+      const qInterColumnSortOrder = (this.props.qInterColumnSortOrder) ? this.props.qInterColumnSortOrder : [];
+      const qInterColumnSortOrderSet = !!(this.props.qInterColumnSortOrder);
+      let sortIndex = 0;
+      const qDimensions = cols.filter((col, i) => {
+        const isDimension = (typeof col === 'string' && !col.startsWith('=')) ||
+          (typeof col === 'object' && col.qDef && col.qDef.qFieldDefs) ||
+          (typeof col === 'object' && col.qLibraryId && col.qType && col.qType === 'dimension');
+        if (isDimension && !qInterColumnSortOrderSet) { qInterColumnSortOrder[i] = sortIndex; sortIndex += 1; }
+        return isDimension;
+      }).map((col) => {
+        if (typeof col === 'string') {
+          return { qDef: { qFieldDefs: [col], qSortCriterias: [{ qSortByAscii, qSortByLoadOrder }] } }; //
+        }
+        return col;
+      });
+      const qMeasures = cols.filter((col, i) => {
+        const isMeasure = (typeof col === 'string' && col.startsWith('=')) ||
+            (typeof col === 'object' && col.qDef && col.qDef.qDef) ||
+            (typeof col === 'object' && col.qLibraryId && col.qType && col.qType === 'measure');
+        if (isMeasure && !qInterColumnSortOrderSet) { qInterColumnSortOrder[i] = sortIndex; sortIndex += 1; }
+        return isMeasure;
+      }).map((col) => {
+        if (typeof col === 'string') {
+          return { qDef: { qDef: col }, qSortBy: { qSortByNumeric: -1 } };
+        }
+        return col;
+      });
+
+      qProp.qHyperCubeDef = {
+        qDimensions,
+        qMeasures,
+        qInterColumnSortOrder,
+        qSuppressZero,
+        // qSuppressMissing: true,
+      };
       return qProp;
     }
 
@@ -105,37 +159,42 @@ export default function withHyperCube(Component) {
     }
 
     @autobind
-    beginSelections() {
+    async beginSelections() {
       const { qObject } = this.state;
       qObject.beginSelections(['/qHyperCubeDef']);
+      await this.setState({ selections: true });
     }
 
     @autobind
-    endSelections(qAccept) {
+    async endSelections(qAccept) {
       const { qObject } = this.state;
       qObject.endSelections(qAccept);
+      await this.setState({ selections: false });
     }
 
     @autobind
-    async select(qElemNumber, dimIndex = 0) {
+    async select(dimIndex, selections, toggle = true) {
       const { qObject } = this.state;
-      qObject.selectHyperCubeValues('/qHyperCubeDef', dimIndex, [qElemNumber], true);
+      await qObject.selectHyperCubeValues('/qHyperCubeDef', dimIndex, selections, toggle);
     }
 
     @autobind
     async applyPatches(patches) {
       const { qObject } = this.state;
-      qObject.applyPatches(patches);
+      await qObject.applyPatches(patches);
     }
 
     render() {
+      const { width, height, cols } = this.props;
       const {
         qObject, qLayout, qData, error,
       } = this.state;
       if (error) {
         return <div>{error.message}</div>;
       } else if (!qObject || !qLayout || !qData) {
-        return <div>Loading...</div>;
+        const preloaderType = (cols && cols.length === 1) ? 'dots' : 'balls';
+        const paddingTop = (parseInt(height, 0)) ? (height / 2) - 10 : 0;
+        return <Preloader width={width} height={height} paddingTop={paddingTop} type={preloaderType} />;
       }
       return (<Component
         {...this.props}

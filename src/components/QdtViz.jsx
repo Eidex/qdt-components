@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import FontAwesome from 'react-fontawesome';
+import Preloader from '../utilities/Preloader';
+import QdtButton from './QdtButton';
 
 export default class QdtViz extends React.Component {
   static propTypes = {
@@ -9,8 +11,20 @@ export default class QdtViz extends React.Component {
     type: PropTypes.oneOf([null, 'barchart', 'boxplot', 'combochart', 'distributionplot', 'gauge', 'histogram', 'kpi', 'linechart', 'piechart', 'pivot-table', 'scatterplot', 'table', 'treemap', 'extension']),
     cols: PropTypes.array,
     options: PropTypes.object,
+    noSelections: PropTypes.bool,
     width: PropTypes.string,
     height: PropTypes.string,
+    minWidth: PropTypes.string,
+    minHeight: PropTypes.string,
+    exportData: PropTypes.bool,
+    exportDataTitle: PropTypes.string,
+    exportDataOptions: PropTypes.obj,
+    exportImg: PropTypes.bool,
+    exportImgTitle: PropTypes.string,
+    exportImgOptions: PropTypes.obj,
+    exportPdf: PropTypes.bool,
+    exportPdfTitle: PropTypes.string,
+    exportPdfOptions: PropTypes.obj,
   }
 
   static defaultProps = {
@@ -18,8 +32,20 @@ export default class QdtViz extends React.Component {
     type: null,
     cols: [],
     options: {},
+    noSelections: false,
     width: '100%',
     height: '100%',
+    minWidth: 'auto',
+    minHeight: 'auto',
+    exportData: false,
+    exportDataTitle: 'Export Data',
+    exportDataOptions: { format: 'CSV_T', state: 'P' },
+    exportImg: false,
+    exportImgTitle: 'Export Image',
+    exportImgOptions: { width: 300, height: 400, format: 'JPG' },
+    exportPdf: false,
+    exportPdfTitle: 'Export Pdf',
+    exportPdfOptions: { documentSize: 'A4', orientation: 'landscape', aspectRatio: 2 },
   }
 
   constructor(props) {
@@ -78,7 +104,7 @@ export default class QdtViz extends React.Component {
       const qViz = await this.qVizPromise;
       if (qViz) {
         await this.setState({ loading: false });
-        qViz.show(this.node);
+        qViz.show(this.node, { noSelections: this.props.noSelections });
       } else {
         throw new Error('Please specify a qConfig global variable');
       }
@@ -102,16 +128,46 @@ export default class QdtViz extends React.Component {
   }
 
   render() {
+    const {
+      width, height, minWidth, minHeight, exportData, exportDataTitle, exportDataOptions, exportImg, exportImgTitle, exportImgOptions, exportPdf, exportPdfTitle, exportPdfOptions,
+    } = this.props;
     if (this.state.error) {
       return <div>{this.state.error.message}</div>;
     } else if (this.state.loading) {
-      return (<div style={{
- display: 'flex', alignItems: 'center', 'text-align': 'center', justifyContent: 'center', height: this.props.height,
-}}
-      ><FontAwesome style={{ margin: 'auto', marginTop: '40px' }} name="spinner" size="5x" spin />
-              </div>);
+//       return (<div style={{
+//  display: 'flex', alignItems: 'center', 'text-align': 'center', justifyContent: 'center', height: this.props.height,
+// }}
+//       ><FontAwesome style={{ margin: 'auto', marginTop: '40px' }} name="spinner" size="5x" spin />
+//               </div>);
+//     }
+//     const { width, height } = this.props;
+//     return <div ref={(node) => { this.node = node; }} style={{ width, height }} onClick={() => { console.log('qdt clicked!'); }} />;
+    //   return <div>Loading...</div>;
+      const paddingTop = (parseInt(height, 0)) ? (height / 2) - 10 : 0;
+      return <Preloader width={width} height={height} paddingTop={paddingTop} />;
     }
-    const { width, height } = this.props;
-    return <div ref={(node) => { this.node = node; }} style={{ width, height }} onClick={() => { console.log('qdt clicked!'); }} />;
+    const btnStyle = { display: 'inline-block', paddingRight: 20, paddingTop: 15 };
+    return (
+      <div>
+        <div
+          ref={(node) => { this.node = node; }}
+          style={{
+ width, height, minWidth, minHeight,
+}}
+        />
+        {exportData &&
+          <div style={btnStyle}>
+            <QdtButton type="exportData" qVizPromise={this.qVizPromise} title={exportDataTitle} options={exportDataOptions} />
+          </div>}
+        {exportImg &&
+          <div style={btnStyle}>
+            <QdtButton type="exportImg" qVizPromise={this.qVizPromise} title={exportImgTitle} options={exportImgOptions} />
+          </div>}
+        {exportPdf &&
+          <div style={btnStyle}>
+            <QdtButton type="exportPdf" qVizPromise={this.qVizPromise} title={exportPdfTitle} options={exportPdfOptions} />
+          </div>}
+      </div>
+    );
   }
 }
