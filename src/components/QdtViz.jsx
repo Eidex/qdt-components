@@ -155,7 +155,7 @@ display: 'flex', alignItems: 'center', 'text-align': 'center', justifyContent: '
           style={{
  width, height, minWidth, minHeight,
 }}
-        />;
+        />
         {exportData &&
           <div style={btnStyle}>
             <QdtButton type="exportData" qVizPromise={this.qVizPromise} title={exportDataTitle} options={exportDataOptions} />
