@@ -14,11 +14,8 @@
 */
 
 import React from 'react';
-// import { ListGroupItem, ListGroup } from 'react-bootstrap';
 import PropTypes from 'prop-types';
 import autobind from 'autobind-decorator';
-// import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem, Input } from 'reactstrap';
-// import { Dropdown, MenuItem } from 'react-bootstrap';
 import { LuiDropdown, LuiList, LuiListItem, LuiSearch, LuiTabset, LuiTab } from 'qdt-lui';
 import withListObject from './withListObject';
 import QdtVirtualScroll from './QdtVirtualScroll';
@@ -29,13 +26,6 @@ const DropdownItemList = ({ qMatrix, rowHeight, select }) => (
   <span>
     {qMatrix.map(row =>
       (
-        // <MenuItem
-        //   className={`border border-light border-left-0 border-right-0 ${row[0].qState}`}
-        //   eventKey={row[0].qElemNumber}
-        //   data-q-elem-number={row[0].qElemNumber}
-        // >
-        //   {row[0].qText}
-        // </MenuItem>
         <LuiListItem
           className={`${row[0].qState}`}
           key={row[0].qElemNumber}
