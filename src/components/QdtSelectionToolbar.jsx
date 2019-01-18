@@ -1,12 +1,60 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 // import { ButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
-import { Dropdown, MenuItem } from 'react-bootstrap';
+// import { Dropdown, MenuItem } from 'react-bootstrap';
+import autobind from 'autobind-decorator';
+import { LuiDropdown } from 'qdt-lui';
 import withSelectionObject from './withSelectionObject';
 import '../styles/index.scss';
 
-const dropdownOpen = [false, false, false, false, false, false];
-const QdtSelectionToolbar = ({ qLayout, clearSelections, update }) => {
+class QdtSelectionToolbarDropdown extends React.Component {
+  static propTypes = {
+    clearSelections: PropTypes.func.isRequired,
+    value: PropTypes.object.isRequired,
+  }
+  state = {
+    dropdownOpen: false,
+  }
+
+  @autobind
+  toggle() {
+    this.setState({ dropdownOpen: !this.state.dropdownOpen });
+  }
+
+  render() {
+    const { clearSelections, value } = this.props;
+    const { dropdownOpen } = this.state;
+    return (
+      <LuiDropdown
+        isOpen={dropdownOpen}
+        toggle={this.toggle}
+        select={false}
+      >
+        <div>
+          {value.field}: {value.selected.length} of {value.total}
+          <span className="lui-icon lui-icon--triangle-bottom" />
+        </div>
+        <ul>
+          {value.selected.map(value2 => (
+            <li key={value2}>
+              {value2}
+              <span
+                className="lui-icon lui-icon--remove pull-right"
+                onClick={() => clearSelections(value.field, value2)}
+                role="button"
+                tabIndex={0}
+              />
+            </li>
+          ))}
+        </ul>
+      </LuiDropdown>
+    );
+  }
+}
+
+const QdtSelectionToolbar = ({
+  qLayout, clearSelections, title, btnText,
+}) => {
   const selectedFields = qLayout.qSelectionObject.qSelections;
   let selections = [];
   if (selectedFields.length) {
@@ -27,26 +75,21 @@ const QdtSelectionToolbar = ({ qLayout, clearSelections, update }) => {
     });
   }
 
-  const toggle = (index) => {
-    dropdownOpen[index] = !(dropdownOpen[index]);
-    update();
-  };
-
   return (
     <div className="qdt-selection-toolbar">
       <ul>
-        <li><strong>SELECTIONS:</strong></li>
+        <li><strong>{title}:</strong></li>
         {selections.length === 0 &&
         <li className="no-selections">None</li>
         }
         {selections.length >= 1 && selections.length <= 6 &&
-            selections.map((value, index) => {
+            selections.map((value) => {
                 if (value.selected.length === 1) {
                     return <li key={value.field}>{value.field}: {value.selected[0]}<span className="lui-icon lui-icon--remove" onClick={() => clearSelections(value.field)} role="button" tabIndex={0} /></li>;
                 }
                     return (
                       <li key={value.field}>
-                        <Dropdown
+                        {/* <Dropdown
                           open={dropdownOpen[index]}
                           onToggle={() => toggle(index)}
                         >
@@ -57,13 +100,14 @@ const QdtSelectionToolbar = ({ qLayout, clearSelections, update }) => {
                           <MenuItem>
                             {value.selected.map(value2 => <MenuItem eventKey={value2}>{value2}<span className="lui-icon lui-icon--remove pull-right" onClick={() => clearSelections(value.field, value2)} role="button" tabIndex={0} /></MenuItem>)}
                           </MenuItem>
-                        </Dropdown>
+                        </Dropdown> */}
+                        <QdtSelectionToolbarDropdown value={value} clearSelections={clearSelections} />
                       </li>
                     );
             })
         }
         {selections.length >= 1 && selections.length <= 6 &&
-        <li><button className="lui-button lui-button--warning clear-all" onClick={() => clearSelections()} tabIndex={0}>Clear All</button></li>
+        <li><button className="lui-button lui-button--warning clear-all" onClick={() => clearSelections()} tabIndex={0}>{btnText}</button></li>
         }
       </ul>
     </div>);
@@ -71,7 +115,12 @@ const QdtSelectionToolbar = ({ qLayout, clearSelections, update }) => {
 QdtSelectionToolbar.propTypes = {
   qLayout: PropTypes.object.isRequired,
   clearSelections: PropTypes.func.isRequired,
-  update: PropTypes.func.isRequired,
+  title: PropTypes.string,
+  btnText: PropTypes.string,
+};
+QdtSelectionToolbar.defaultProps = {
+  title: 'SELECTIONS',
+  btnText: 'Clear All',
 };
 
 const QdtSelectionToolbarObject = withSelectionObject(QdtSelectionToolbar);
@@ -90,9 +139,6 @@ QdtSelectionToolbarObject.defaultProps = {
     qWidth: 1,
     qHeight: 1,
   },
-};
-QdtSelectionToolbarObject.state = {
-  dropdownOpen: [false, false, false, false, false, false],
 };
 
 export default QdtSelectionToolbarObject;
