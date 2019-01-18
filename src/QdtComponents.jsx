@@ -40,9 +40,12 @@ const QdtComponents = class {
       myConfig.identity = connections.useUniqueSessionID;
     } else if (myConfig.core) {
       myConfig.identity = null;
-    } else {
-      myConfig.identity = utility.Uid(16);
     }
+
+    // DS: was causing the session used by qdt-components to not match the session used by enigma and the hub
+    // else {
+    //   myConfig.identity = utility.Uid(16);
+    // }
     this.qAppPromise = (connections.vizApi) ? qApp(myConfig) : null;
     this.qDocPromise = (connections.engineApi) ? qDoc(myConfig) : null;
   }
