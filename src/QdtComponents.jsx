@@ -32,17 +32,21 @@ const QdtComponents = class {
   static globals = utility.globals;
 
   constructor(config = {}, connections = { vizApi: true, engineApi: true, useUniqueSessionID: null }) {
+    console.log('config');
+    console.log(config);
     const myConfig = config;
     // Make it work for Qlik Core scaling https://github.com/qlik-oss/core-scaling
     // No identity needed, core scaling is handling all of the sessions
     // qlikcore/engine:12.248.0
-    if (connections.useUniqueSessionID) {
-      myConfig.identity = connections.useUniqueSessionID;
-    } else if (myConfig.core) {
-      myConfig.identity = null;
-    } else {
-      myConfig.identity = utility.Uid(16);
-    }
+    // if (connections.useUniqueSessionID) {
+    //   myConfig.identity = connections.useUniqueSessionID;
+    // } else if (myConfig.core) {
+    //   myConfig.identity = null;
+    // } else {
+    //   myConfig.identity = utility.Uid(16);
+    // }
+    console.log('myConfig');
+    console.log(myConfig);
     this.qAppPromise = (connections.vizApi) ? qApp(myConfig) : null;
     this.qDocPromise = (connections.engineApi) ? qDoc(myConfig) : null;
   }
