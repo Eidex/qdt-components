@@ -28,15 +28,10 @@ const qDoc = async (config) => {
   const myConfig = config;
   // Make it work for Qlik Core scaling https://github.com/qlik-oss/core-scaling
   // qlikcore/engine:12.248.0
-  console.log('config');
-  console.log(config);
   if (myConfig.core) {
-    console.log('IN CORE BULLSHIT!');
     myConfig.subpath = (myConfig.prefix) ? `${myConfig.prefix}/app` : 'app';
     myConfig.route = `doc/${myConfig.appId}`;
   }
-  console.log('myConfig');
-  console.log(myConfig);
   const url = SenseUtilities.buildUrl(myConfig);
   const session = enigma.create({ schema, url, responseInterceptors });
   const global = await session.open();
