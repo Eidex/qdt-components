@@ -25,6 +25,7 @@ export default class QdtViz extends React.Component {
     exportPdf: PropTypes.bool,
     exportPdfTitle: PropTypes.string,
     exportPdfOptions: PropTypes.obj,
+    getQViz: PropTypes.func,
   }
 
   static defaultProps = {
@@ -46,6 +47,7 @@ export default class QdtViz extends React.Component {
     exportPdf: false,
     exportPdfTitle: 'Export Pdf',
     exportPdfOptions: { documentSize: 'A4', orientation: 'landscape', aspectRatio: 2 },
+    getQViz: () => {},
   }
 
   constructor(props) {
@@ -63,6 +65,7 @@ export default class QdtViz extends React.Component {
 
   componentDidMount() {
     this.show();
+    this.props.getQViz(this.qVizPromise);
   }
 
   componentWillReceiveProps(newProps) {

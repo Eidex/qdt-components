@@ -50,7 +50,7 @@ const QdtComponents = class {
     this.qDocPromise = (connections.engineApi) ? qDoc(myConfig) : null;
   }
 
-  render = async (type, props, element) => new Promise((resolve, reject) => {
+  render = async (type, props, element, getQViz) => new Promise((resolve, reject) => {
     try {
       const { qAppPromise, qDocPromise } = this;
       const Component = components[type];
@@ -59,6 +59,7 @@ const QdtComponents = class {
           {...props}
           qAppPromise={qAppPromise}
           qDocPromise={qDocPromise}
+          getQViz={getQViz}
           ref={node => resolve(node)}
         />,
         element,
