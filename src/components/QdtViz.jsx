@@ -69,6 +69,8 @@ export default class QdtViz extends React.Component {
   }
 
   componentWillReceiveProps(newProps) {
+    console.log('qdt-component componentWillReceiveProps');
+    console.log(newProps);
     if (JSON.stringify(newProps.options) !== JSON.stringify(this.props.options)) {
       this.setOptions(newProps.options);
     }
