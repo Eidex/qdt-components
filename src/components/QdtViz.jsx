@@ -60,32 +60,23 @@ export default class QdtViz extends React.Component {
   }
 
   componentWillMount() {
-    console.log('componentWillMount');
     this.qVizPromise = this.create();
   }
 
   componentDidMount() {
-    console.log('componentDidMount');
     this.show();
     this.props.getQViz(this.qVizPromise);
   }
 
   componentWillReceiveProps(newProps) {
-    // console.log('qdt-component componentDidUpdate');
-    // console.log(newProps.options);
-    // console.log(this.props.options);
-    // console.log(JSON.stringify(newProps.options) !== JSON.stringify(this.props.options));
-    // console.log('shouldComponentUpdate');
+    // DS: this check is being done by the Prism qdtComponent now
     // if (JSON.stringify(newProps.options) !== JSON.stringify(this.props.options)) {
-    //   console.log('qdt-component setting options');
     //   this.setOptions(newProps.options);
-    //   return true;
     // }
 
-    // return false;
-    console.log('componentWillReceiveProps');
     this.setOptions(newProps.options);
-    // this.close();
+
+    // this.close(); //DS: this was causing the session object to be destroyed after being updated
   }
 
   componentWillUnmount() {
@@ -144,7 +135,6 @@ export default class QdtViz extends React.Component {
   }
 
   render() {
-    console.log('render');
     const {
       width, height, minWidth, minHeight, exportData, exportDataTitle, exportDataOptions, exportImg, exportImgTitle, exportImgOptions, exportPdf, exportPdfTitle, exportPdfOptions,
     } = this.props;
