@@ -60,10 +60,12 @@ export default class QdtViz extends React.Component {
   }
 
   componentWillMount() {
+    console.log('componentWillMount');
     this.qVizPromise = this.create();
   }
 
   componentDidMount() {
+    console.log('componentDidMount');
     this.show();
     this.props.getQViz(this.qVizPromise);
   }
@@ -73,6 +75,7 @@ export default class QdtViz extends React.Component {
     // console.log(newProps.options);
     // console.log(this.props.options);
     // console.log(JSON.stringify(newProps.options) !== JSON.stringify(this.props.options));
+    console.log('shouldComponentUpdate');
     if (JSON.stringify(newProps.options) !== JSON.stringify(this.props.options)) {
       console.log('qdt-component setting options');
       this.setOptions(newProps.options);
@@ -140,6 +143,7 @@ export default class QdtViz extends React.Component {
   }
 
   render() {
+    console.log('render');
     const {
       width, height, minWidth, minHeight, exportData, exportDataTitle, exportDataOptions, exportImg, exportImgTitle, exportImgOptions, exportPdf, exportPdfTitle, exportPdfOptions,
     } = this.props;
