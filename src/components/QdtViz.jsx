@@ -70,20 +70,21 @@ export default class QdtViz extends React.Component {
     this.props.getQViz(this.qVizPromise);
   }
 
-  shouldComponentUpdate(newProps) {
+  componentWillReceiveProps(newProps) {
     // console.log('qdt-component componentDidUpdate');
     // console.log(newProps.options);
     // console.log(this.props.options);
     // console.log(JSON.stringify(newProps.options) !== JSON.stringify(this.props.options));
-    console.log('shouldComponentUpdate');
-    if (JSON.stringify(newProps.options) !== JSON.stringify(this.props.options)) {
-      console.log('qdt-component setting options');
-      this.setOptions(newProps.options);
-      return true;
-    }
+    // console.log('shouldComponentUpdate');
+    // if (JSON.stringify(newProps.options) !== JSON.stringify(this.props.options)) {
+    //   console.log('qdt-component setting options');
+    //   this.setOptions(newProps.options);
+    //   return true;
+    // }
 
-    return false;
-    // this.setOptions(newProps.options);
+    // return false;
+    console.log('componentWillReceiveProps');
+    this.setOptions(newProps.options);
     // this.close();
   }
 
