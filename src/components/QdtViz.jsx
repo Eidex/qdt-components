@@ -68,16 +68,13 @@ export default class QdtViz extends React.Component {
     this.props.getQViz(this.qVizPromise);
   }
 
-  componentWillReceiveProps() {
+  componentWillReceiveProps(newProps) {
     // DS: this check is being done by the Prism qdtComponent now
     // if (JSON.stringify(newProps.options) !== JSON.stringify(this.props.options)) {
     //   this.setOptions(newProps.options);
     // }
 
-    // this.setOptions(newProps.options);
-    this.close().then(() => {
-      this.qVizPromise = this.create();
-    });
+    this.setOptions(newProps.options);
 
     // this.close(); //DS: this was causing the session object to be destroyed after being updated
   }
