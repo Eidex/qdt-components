@@ -33,7 +33,15 @@ const qDoc = async (config) => {
     myConfig.route = `doc/${myConfig.appId}`;
   }
   const url = SenseUtilities.buildUrl(myConfig);
-  const session = enigma.create({ schema, url, responseInterceptors });
+  const session = enigma.create({ schema, url, responseInterceptors: [{
+    onFulfilled: function setLoading(sessionReference, request, result) {
+      if (request.method === 'GetLayout') {
+        console.log("Chart Finshed Loading?", result)
+      }
+        return result;
+      }
+    }]
+  });
   const global = await session.open();
   if (myConfig.core) {
     return global.getActiveDoc();
