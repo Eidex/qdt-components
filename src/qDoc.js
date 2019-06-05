@@ -24,7 +24,7 @@ const responseInterceptors = [{
   },
 }];
 
-const qDoc = async (config) => {
+const qDoc = async (config, interceptors) => {
   const myConfig = config;
   // Make it work for Qlik Core scaling https://github.com/qlik-oss/core-scaling
   // qlikcore/engine:12.248.0
@@ -33,15 +33,8 @@ const qDoc = async (config) => {
     myConfig.route = `doc/${myConfig.appId}`;
   }
   const url = SenseUtilities.buildUrl(myConfig);
-  const session = enigma.create({ schema, url, responseInterceptors: [{
-    onFulfilled: function setLoading(sessionReference, request, result) {
-      if (request.method === 'GetLayout') {
-        console.log("Chart Finshed Loading?", result)
-      }
-        return result;
-      }
-    }]
-  });
+  const session = enigma.create({ schema, url, responseInterceptors: interceptors});
+
   const global = await session.open();
   if (myConfig.core) {
     return global.getActiveDoc();
