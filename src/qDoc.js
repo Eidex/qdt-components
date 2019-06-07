@@ -32,6 +32,12 @@ const qDoc = async (config, interceptors) => {
     myConfig.subpath = (myConfig.prefix) ? `${myConfig.prefix}/app` : 'app';
     myConfig.route = `doc/${myConfig.appId}`;
   }
+
+  console.log(responseInterceptors);
+  console.log(interceptors.response);
+  console.log(responseInterceptors.concat(interceptors.response));
+  console.log(interceptors.request);
+
   const url = SenseUtilities.buildUrl(myConfig);
   const session = enigma.create({
     schema, url, responseInterceptors: responseInterceptors.concat(interceptors.response), requestInterceptors: interceptors.request,
