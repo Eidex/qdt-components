@@ -54,6 +54,7 @@ const QdtComponents = class {
     try {
       const { qAppPromise, qDocPromise } = this;
       const Component = components[type];
+
       ReactDOM.render(
         <Component
           {...props}
