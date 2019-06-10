@@ -98,6 +98,7 @@ export default class QdtViz extends React.Component {
         qAppPromise, id, type, cols, options,
       } = this.props;
       const qApp = await qAppPromise;
+      console.log(qApp);
       const qVizPromise = id ? qApp.visualization.get(id) : qApp.visualization.create(type, cols, options); // eslint-disable-line max-len
       return qVizPromise;
     } catch (error) {
