@@ -22,6 +22,20 @@ const responseInterceptors = [{
     // the initial promise that the user got when invoking the QIX method:
     return this.Promise.reject(error);
   },
+  onFulfilled: function something(sessionReference, request, result) {
+    console.log('inside response', request, result);
+    //   if (request.method === 'GetLayout') {
+    //     console.log("inside getLayout response")
+    //   } else {
+    //     console.log("inside response")
+    //   }
+  },
+}];
+
+const requestInterceptors = [{
+  onFulfilled: function somethingElse(sessionReference, request) {
+    console.log('inside request', request);
+  },
 }];
 
 const qDoc = async (config, interceptors) => {
@@ -40,7 +54,7 @@ const qDoc = async (config, interceptors) => {
 
   const url = SenseUtilities.buildUrl(myConfig);
   const session = enigma.create({
-    schema, url, responseInterceptors: responseInterceptors.concat(interceptors.response), requestInterceptors: interceptors.request,
+    schema, url, responseInterceptors, requestInterceptors,
   });
 
   const global = await session.open();
