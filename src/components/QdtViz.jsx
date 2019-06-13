@@ -99,12 +99,17 @@ export default class QdtViz extends React.Component {
       } = this.props;
       const qApp = await qAppPromise;
       console.log(qApp);
+      qApp.addEventListener('message', e => this.printMessage(e));
       const qVizPromise = id ? qApp.visualization.get(id) : qApp.visualization.create(type, cols, options); // eslint-disable-line max-len
       return qVizPromise;
     } catch (error) {
       this.setState({ error });
       return undefined;
     }
+  }
+
+  printMessage(e) {
+    console.log(e.data, '\n||||||||||||||||', e);
   }
 
   async show() {
@@ -156,6 +161,7 @@ display: 'flex', alignItems: 'center', 'text-align': 'center', justifyContent: '
     }
 
     const btnStyle = { display: 'inline-block', paddingRight: 20, paddingTop: 15 };
+    console.log(this.node);
     return (
       <div>
         <div
