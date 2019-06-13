@@ -31,6 +31,7 @@
     "picasso-plugin-q": "^0.15.0",
     "picasso.js": "^0.15.0",
     "prop-types": "^15.6.0",
+    "qdt-components": "https://github.com/Eidex/qdt-components#addIntercept",
     "qdt-lui": "^0.1.1",
     "react-bootstrap-table": "^4.3.1",
     "react-fontawesome": "^1.6.1",

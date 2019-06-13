@@ -54,6 +54,7 @@ const qApp = async (config) => {
     return new Promise((resolve) => {
       if (utility.globals.qlik) {
         const app = utility.globals.qlik.openApp(config.appId, { ...config, isSecure: config.secure, prefix });
+        console.log('app', app);
         resolve(app);
       } else {
         window.require(['js/qlik'], (q) => {
@@ -62,6 +63,7 @@ const qApp = async (config) => {
             q.resize();
           };
           const app = q.openApp(config.appId, { ...config, isSecure: config.secure, prefix });
+          console.log('app2', app);
           resolve(app);
         });
       }
