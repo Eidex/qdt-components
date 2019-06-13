@@ -99,7 +99,7 @@ export default class QdtViz extends React.Component {
       } = this.props;
       const qApp = await qAppPromise;
       console.log('qApp', qApp);
-      qApp.addEventListener('message', e => this.printMessage(e, 'qApp'));
+      // qApp.addEventListener('message', e => this.printMessage(e, 'qApp'));
       const qVizPromise = id ? qApp.visualization.get(id) : qApp.visualization.create(type, cols, options); // eslint-disable-line max-len
       return qVizPromise;
     } catch (error) {
@@ -119,7 +119,7 @@ export default class QdtViz extends React.Component {
         await this.setState({ loading: false });
         qViz.show(this.node, { noSelections: this.props.noSelections });
         console.log('qVis', qViz);
-        qViz.addEventListener('message', e => this.printMessage(e, 'qViz'));
+        // qViz.addEventListener('message', e => this.printMessage(e, 'qViz'));
       } else {
         throw new Error('Please specify a qConfig global variable');
       }
