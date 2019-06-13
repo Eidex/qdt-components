@@ -55,6 +55,7 @@ const qApp = async (config) => {
       if (utility.globals.qlik) {
         const app = utility.globals.qlik.openApp(config.appId, { ...config, isSecure: config.secure, prefix });
         console.log('app', app);
+        app.addEventListener('message', e => console.log('app message:\n', e.data, '\n||||||||||||||||', e));
         resolve(app);
       } else {
         window.require(['js/qlik'], (q) => {
