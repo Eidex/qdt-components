@@ -26,6 +26,7 @@ export default class QdtViz extends React.Component {
     exportPdfTitle: PropTypes.string,
     exportPdfOptions: PropTypes.obj,
     getQViz: PropTypes.func,
+    getIsLoading: PropTypes.func,
   }
 
   static defaultProps = {
@@ -48,6 +49,7 @@ export default class QdtViz extends React.Component {
     exportPdfTitle: 'Export Pdf',
     exportPdfOptions: { documentSize: 'A4', orientation: 'landscape', aspectRatio: 2 },
     getQViz: () => {},
+    getIsLoading: () => {},
   }
 
   constructor(props) {
@@ -112,6 +114,7 @@ export default class QdtViz extends React.Component {
       if (qViz) {
         await this.setState({ loading: false });
         qViz.show(this.node, { noSelections: this.props.noSelections });
+        this.props.getIsLoading(false);
       } else {
         throw new Error('Please specify a qConfig global variable');
       }
