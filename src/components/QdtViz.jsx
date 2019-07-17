@@ -8,6 +8,8 @@ export default class QdtViz extends React.Component {
   static propTypes = {
     qAppPromise: PropTypes.object.isRequired,
     id: PropTypes.string,
+    chartId: PropTypes.string,
+    reportType: PropTypes.string,
     type: PropTypes.oneOf([null, 'barchart', 'boxplot', 'combochart', 'distributionplot', 'gauge', 'histogram', 'kpi', 'linechart', 'piechart', 'pivot-table', 'scatterplot', 'table', 'treemap', 'extension']),
     cols: PropTypes.array,
     options: PropTypes.object,
@@ -30,6 +32,8 @@ export default class QdtViz extends React.Component {
 
   static defaultProps = {
     id: null,
+    chartId: null,
+    reportType: null,
     type: null,
     cols: [],
     options: {},
@@ -65,7 +69,12 @@ export default class QdtViz extends React.Component {
 
   componentDidMount() {
     this.show();
-    this.props.getQViz(this.qVizPromise);
+
+    if (this.props.reportType === 'common') {
+      this.props.getQViz(this.qVizPromise);
+    } else {
+      this.props.getQViz(this.qVizPromise, this.props.chartId);
+    }
   }
 
   componentWillReceiveProps(newProps) {
