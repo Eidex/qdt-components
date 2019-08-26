@@ -32,7 +32,6 @@
     "picasso.js": "^0.15.0",
     "prop-types": "^15.6.0",
     "qdt-lui": "^0.1.1",
-    "react-bootstrap": "^0.32.1",
     "react-bootstrap-table": "^4.3.1",
     "react-fontawesome": "^1.6.1",
     "ws": "^5.1.0"
@@ -72,6 +71,7 @@
   },
   "peerDependencies": {
     "react": "^16.0.0",
+    "react-bootstrap": "^0.32.1",
     "react-dom": "^16.0.0"
   }
 }

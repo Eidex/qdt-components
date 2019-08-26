@@ -50,16 +50,18 @@ const QdtComponents = class {
     this.qDocPromise = (connections.engineApi) ? qDoc(myConfig) : null;
   }
 
-  render = async (type, props, element, getQViz) => new Promise((resolve, reject) => {
+  render = async (type, props, element, getQViz, chartId) => new Promise((resolve, reject) => {
     try {
       const { qAppPromise, qDocPromise } = this;
       const Component = components[type];
+
       ReactDOM.render(
         <Component
           {...props}
           qAppPromise={qAppPromise}
           qDocPromise={qDocPromise}
           getQViz={getQViz}
+          chartId={chartId}
           ref={node => resolve(node)}
         />,
         element,

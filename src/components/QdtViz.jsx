@@ -25,6 +25,7 @@ export default class QdtViz extends React.Component {
     exportPdf: PropTypes.bool,
     exportPdfTitle: PropTypes.string,
     exportPdfOptions: PropTypes.obj,
+    chartId: PropTypes.string,
     getQViz: PropTypes.func,
   }
 
@@ -47,6 +48,7 @@ export default class QdtViz extends React.Component {
     exportPdf: false,
     exportPdfTitle: 'Export Pdf',
     exportPdfOptions: { documentSize: 'A4', orientation: 'landscape', aspectRatio: 2 },
+    chartId: null,
     getQViz: () => {},
   }
 
@@ -65,14 +67,18 @@ export default class QdtViz extends React.Component {
 
   componentDidMount() {
     this.show();
-    this.props.getQViz(this.qVizPromise);
+    this.props.getQViz(this.qVizPromise, this.props.chartId);
   }
 
   componentWillReceiveProps(newProps) {
-    if (JSON.stringify(newProps.options) !== JSON.stringify(this.props.options)) {
-      this.setOptions(newProps.options);
-    }
-    this.close();
+    // DS: this check is being done by the Prism qdtComponent now
+    // if (JSON.stringify(newProps.options) !== JSON.stringify(this.props.options)) {
+    //   this.setOptions(newProps.options);
+    // }
+
+    this.setOptions(newProps.options);
+
+    // this.close(); //DS: this was causing the session object to be destroyed after being updated
   }
 
   componentWillUnmount() {
