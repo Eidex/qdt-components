@@ -51,14 +51,15 @@ const QdtViz = ({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  //   useEffect(() => {
-  //     try {
-  //       qViz.setOptions(options);
-  //     } catch (_error) {
-  //       setError(_error);
-  //     }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  //   }, [options]);
+  useEffect(() => {
+    try {
+      console.log(qViz);
+      qViz.setOptions(options);
+    } catch (_error) {
+      setError(_error);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [options]);
 
   return (
     <>
