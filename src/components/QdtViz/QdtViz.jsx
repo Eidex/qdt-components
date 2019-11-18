@@ -10,30 +10,32 @@ const QdtViz = ({
 }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const qViz = useRef(null);
+  const qVizPromise = useRef(null);
   const node = useRef(null);
 
   // let qViz = null;
 
   const btnStyle = { display: 'inline-block', paddingRight: 20, paddingTop: 15 };
-  let qVizPromise = null;
+  // let qVizPromise = null;
 
   const create = async () => {
     const qApp = await qAppPromise;
-    qVizPromise = id ? qApp.visualization.get(id) : qApp.visualization.create(type, cols, options); // eslint-disable-line max-len
-    getQViz(qVizPromise, chartId);
-    qViz.current = await qVizPromise;
-    qViz.current.setOptions(options);
+    qVizPromise.current = id ? qApp.visualization.get(id) : qApp.visualization.create(type, cols, options); // eslint-disable-line max-len
+    getQViz(qVizPromise.current, chartId);
+    const qViz = await qVizPromise.current;
+    qViz.setOptions(options);
     await setLoading(false);
     qViz.show(node.current, { noSelections, noInteraction });
   };
 
-  const close = () => {
-    qViz.current.close();
+  const close = async () => {
+    const qViz = await qVizPromise.current;
+    qViz.close();
   };
 
-  const resize = () => {
-    qViz.current.resize();
+  const resize = async () => {
+    const qViz = await qVizPromise.current;
+    qViz.resize();
   };
 
   useEffect(() => {
@@ -54,8 +56,11 @@ const QdtViz = ({
 
   useEffect(() => {
     try {
-      console.log(qViz);
-      qViz.current.setOptions(options);
+      (async () => {
+        const qViz = await qVizPromise.current;
+        console.log(qViz);
+        qViz.setOptions(options);
+      })();
     } catch (_error) {
       setError(_error);
     }

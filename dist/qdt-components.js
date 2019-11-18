@@ -19057,15 +19057,14 @@ var QdtViz_QdtViz = function QdtViz(_ref) {
       error = _useState4[0],
       setError = _useState4[1];
 
-  var qViz = Object(react["useRef"])(null);
+  var qVizPromise = Object(react["useRef"])(null);
   var node = Object(react["useRef"])(null); // let qViz = null;
 
   var btnStyle = {
     display: 'inline-block',
     paddingRight: 20,
     paddingTop: 15
-  };
-  var qVizPromise = null;
+  }; // let qVizPromise = null;
 
   var create =
   /*#__PURE__*/
@@ -19073,7 +19072,7 @@ var QdtViz_QdtViz = function QdtViz(_ref) {
     var _ref2 = asyncToGenerator_default()(
     /*#__PURE__*/
     regenerator_default.a.mark(function _callee() {
-      var qApp;
+      var qApp, qViz;
       return regenerator_default.a.wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
@@ -19083,15 +19082,15 @@ var QdtViz_QdtViz = function QdtViz(_ref) {
 
             case 2:
               qApp = _context.sent;
-              qVizPromise = id ? qApp.visualization.get(id) : qApp.visualization.create(type, cols, options); // eslint-disable-line max-len
+              qVizPromise.current = id ? qApp.visualization.get(id) : qApp.visualization.create(type, cols, options); // eslint-disable-line max-len
 
-              getQViz(qVizPromise, chartId);
+              getQViz(qVizPromise.current, chartId);
               _context.next = 7;
-              return qVizPromise;
+              return qVizPromise.current;
 
             case 7:
-              qViz.current = _context.sent;
-              qViz.current.setOptions(options);
+              qViz = _context.sent;
+              qViz.setOptions(options);
               _context.next = 11;
               return setLoading(false);
 
@@ -19114,24 +19113,78 @@ var QdtViz_QdtViz = function QdtViz(_ref) {
     };
   }();
 
-  var close = function close() {
-    qViz.current.close();
-  };
+  var close =
+  /*#__PURE__*/
+  function () {
+    var _ref3 = asyncToGenerator_default()(
+    /*#__PURE__*/
+    regenerator_default.a.mark(function _callee2() {
+      var qViz;
+      return regenerator_default.a.wrap(function _callee2$(_context2) {
+        while (1) {
+          switch (_context2.prev = _context2.next) {
+            case 0:
+              _context2.next = 2;
+              return qVizPromise.current;
 
-  var resize = function resize() {
-    qViz.current.resize();
-  };
+            case 2:
+              qViz = _context2.sent;
+              qViz.close();
+
+            case 4:
+            case "end":
+              return _context2.stop();
+          }
+        }
+      }, _callee2);
+    }));
+
+    return function close() {
+      return _ref3.apply(this, arguments);
+    };
+  }();
+
+  var resize =
+  /*#__PURE__*/
+  function () {
+    var _ref4 = asyncToGenerator_default()(
+    /*#__PURE__*/
+    regenerator_default.a.mark(function _callee3() {
+      var qViz;
+      return regenerator_default.a.wrap(function _callee3$(_context3) {
+        while (1) {
+          switch (_context3.prev = _context3.next) {
+            case 0:
+              _context3.next = 2;
+              return qVizPromise.current;
+
+            case 2:
+              qViz = _context3.sent;
+              qViz.resize();
+
+            case 4:
+            case "end":
+              return _context3.stop();
+          }
+        }
+      }, _callee3);
+    }));
+
+    return function resize() {
+      return _ref4.apply(this, arguments);
+    };
+  }();
 
   Object(react["useEffect"])(function () {
     try {
       asyncToGenerator_default()(
       /*#__PURE__*/
-      regenerator_default.a.mark(function _callee2() {
-        return regenerator_default.a.wrap(function _callee2$(_context2) {
+      regenerator_default.a.mark(function _callee4() {
+        return regenerator_default.a.wrap(function _callee4$(_context4) {
           while (1) {
-            switch (_context2.prev = _context2.next) {
+            switch (_context4.prev = _context4.next) {
               case 0:
-                _context2.next = 2;
+                _context4.next = 2;
                 return create();
 
               case 2:
@@ -19139,10 +19192,10 @@ var QdtViz_QdtViz = function QdtViz(_ref) {
 
               case 3:
               case "end":
-                return _context2.stop();
+                return _context4.stop();
             }
           }
-        }, _callee2);
+        }, _callee4);
       }))();
     } catch (_error) {
       setError(_error);
@@ -19155,8 +19208,29 @@ var QdtViz_QdtViz = function QdtViz(_ref) {
   }, []);
   Object(react["useEffect"])(function () {
     try {
-      console.log(qViz);
-      qViz.current.setOptions(options);
+      asyncToGenerator_default()(
+      /*#__PURE__*/
+      regenerator_default.a.mark(function _callee5() {
+        var qViz;
+        return regenerator_default.a.wrap(function _callee5$(_context5) {
+          while (1) {
+            switch (_context5.prev = _context5.next) {
+              case 0:
+                _context5.next = 2;
+                return qVizPromise.current;
+
+              case 2:
+                qViz = _context5.sent;
+                console.log(qViz);
+                qViz.setOptions(options);
+
+              case 5:
+              case "end":
+                return _context5.stop();
+            }
+          }
+        }, _callee5);
+      }))();
     } catch (_error) {
       setError(_error);
     } // eslint-disable-next-line react-hooks/exhaustive-deps
