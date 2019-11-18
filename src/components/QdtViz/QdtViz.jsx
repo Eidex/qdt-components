@@ -10,9 +10,10 @@ const QdtViz = ({
 }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const qViz = useRef(null);
   const node = useRef(null);
 
-  let qViz = null;
+  // let qViz = null;
 
   const btnStyle = { display: 'inline-block', paddingRight: 20, paddingTop: 15 };
   let qVizPromise = null;
@@ -21,18 +22,18 @@ const QdtViz = ({
     const qApp = await qAppPromise;
     qVizPromise = id ? qApp.visualization.get(id) : qApp.visualization.create(type, cols, options); // eslint-disable-line max-len
     getQViz(qVizPromise, chartId);
-    qViz = await qVizPromise;
-    qViz.setOptions(options);
+    qViz.current = await qVizPromise;
+    qViz.current.setOptions(options);
     await setLoading(false);
     qViz.show(node.current, { noSelections, noInteraction });
   };
 
   const close = () => {
-    qViz.close();
+    qViz.current.close();
   };
 
   const resize = () => {
-    qViz.resize();
+    qViz.current.resize();
   };
 
   useEffect(() => {
@@ -54,7 +55,7 @@ const QdtViz = ({
   useEffect(() => {
     try {
       console.log(qViz);
-      qViz.setOptions(options);
+      qViz.current.setOptions(options);
     } catch (_error) {
       setError(_error);
     }

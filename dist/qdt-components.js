@@ -19057,8 +19057,9 @@ var QdtViz_QdtViz = function QdtViz(_ref) {
       error = _useState4[0],
       setError = _useState4[1];
 
-  var node = Object(react["useRef"])(null);
-  var qViz = null;
+  var qViz = Object(react["useRef"])(null);
+  var node = Object(react["useRef"])(null); // let qViz = null;
+
   var btnStyle = {
     display: 'inline-block',
     paddingRight: 20,
@@ -19089,8 +19090,8 @@ var QdtViz_QdtViz = function QdtViz(_ref) {
               return qVizPromise;
 
             case 7:
-              qViz = _context.sent;
-              qViz.setOptions(options);
+              qViz.current = _context.sent;
+              qViz.current.setOptions(options);
               _context.next = 11;
               return setLoading(false);
 
@@ -19114,11 +19115,11 @@ var QdtViz_QdtViz = function QdtViz(_ref) {
   }();
 
   var close = function close() {
-    qViz.close();
+    qViz.current.close();
   };
 
   var resize = function resize() {
-    qViz.resize();
+    qViz.current.resize();
   };
 
   Object(react["useEffect"])(function () {
@@ -19155,7 +19156,7 @@ var QdtViz_QdtViz = function QdtViz(_ref) {
   Object(react["useEffect"])(function () {
     try {
       console.log(qViz);
-      qViz.setOptions(options);
+      qViz.current.setOptions(options);
     } catch (_error) {
       setError(_error);
     } // eslint-disable-next-line react-hooks/exhaustive-deps
