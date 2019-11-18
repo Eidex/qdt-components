@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import FontAwesome from 'react-fontawesome';
-//import Preloader from '../../utilities/Preloader';
+// import Preloader from '../../utilities/Preloader';
 import QdtButton from '../QdtButton/QdtButton';
 
 
 const QdtViz = ({
-  qAppPromise, id, type, cols, options, noSelections, noInteraction, width, height, minWidth, minHeight, exportData, exportDataTitle, exportDataOptions, exportImg, exportImgTitle, exportImgOptions, exportPdf, exportPdfTitle, exportPdfOptions, chartId, getQViz
+  qAppPromise, id, type, cols, options, noSelections, noInteraction, width, height, minWidth, minHeight, exportData, exportDataTitle, exportDataOptions, exportImg, exportImgTitle, exportImgOptions, exportPdf, exportPdfTitle, exportPdfOptions, chartId, getQViz,
 }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -54,20 +54,24 @@ const QdtViz = ({
   useEffect(() => {
     try {
       qViz.setOptions(options);
-    } catch (error) {
-      setError(error);
+    } catch (_error) {
+      setError(_error);
     }
-  }, [options]);
+  }, [options, qViz]);
 
   return (
     <>
       { error && <div>{error.message}</div> }
-      { loading && 
-        // <Preloader width={width} height={height} paddingTop={(parseInt(height, 0)) ? (height / 2) - 10 : 0} /> 
-        <div style={{display: 'flex', alignItems: 'center', 'text-align': 'center', justifyContent: 'center', height: this.props.height}}>
+      { loading
+        // <Preloader width={width} height={height} paddingTop={(parseInt(height, 0)) ? (height / 2) - 10 : 0} />
+        && (
+        <div style={{
+          display: 'flex', alignItems: 'center', 'text-align': 'center', justifyContent: 'center', height,
+        }}
+        >
           <FontAwesome style={{ margin: 'auto', marginTop: '40px' }} name="spinner" size="5x" spin />
         </div>
-      }
+        )}
       { !error && !loading
         && (
           <>
