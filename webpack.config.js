@@ -1,58 +1,44 @@
 const path = require('path');
 const webpack = require('webpack');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
   devtool: 'source-map',
-  entry: './src/index',
-//   entry: ['babel-polyfill', './src/index'],
+  entry: {
+    "qdt-components": "./src/index",
+    "qdt-components.min": "./src/index",
+  },
+  mode: 'production',
   output: {
     path: path.resolve(__dirname, 'dist'),
     publicPath: '/',
-    filename: 'qdt-components.js',
+    filename: "[name].js",
     library: 'QdtComponents',
     libraryTarget: 'umd',
     libraryExport: 'default',
   },
   module: {
-    loaders: [
-      {
-        include: /\.(js|jsx)$/,
-        exclude: /(node_modules)/,
-        loader: 'babel-loader',
-        query: {
-          presets: [['env',{"debug": false}], 'react'],
-          plugins: ['transform-decorators-legacy', 'transform-class-properties', 'transform-runtime', "transform-object-rest-spread"],
-        //   presets: [['env', {es2015: {modules: process.env.ENV === 'production' ? 'commonjs' : false}}], 'react'],
-        //   plugins: ['transform-decorators-legacy', 'transform-object-rest-spread', 'transform-class-properties',],
-        },
-      },
+    rules: [
       {
         test: /\.(js|jsx)$/,
-        exclude: /(node_modules)/,
-        loader: 'eslint-loader',
-        options: {
-          fix: true
-        },
+        exclude: /node_modules/,
+        use: [
+          'babel-loader',
+          {
+            loader: 'eslint-loader',
+            options: {
+              fix: true,
+            },
+          },
+        ],
       },
       {
         test: /\.(scss|css)$/,
-        use: [{
-          loader: 'style-loader', // inject CSS to page
-        }, {
-          loader: 'css-loader', // translates CSS into CommonJS modules
-        }, {
-          loader: 'postcss-loader', // Run post css actions
-          options: {
-            plugins() { // post css plugins, can be exported to postcss.config.js
-              return [
-                require('precss'),
-                require('autoprefixer'),
-              ];
-            },
-          },
-        }, {
-          loader: 'sass-loader', // compiles SASS to CSS
-        }],
+        use: [
+          "style-loader", // creates style nodes from JS strings
+          "css-loader", // translates CSS into CommonJS
+          "sass-loader" // compiles Sass to CSS, using Node Sass by default
+        ],
       },    
       {
         test: /\.(ttf|eot|woff|woff2)$/,
@@ -60,11 +46,7 @@ module.exports = {
         options: {
           name: "[name].[ext]",
         },  
-      },      
-      {
-          test: /\.json$/,
-          loader: 'json-loader'
-      },
+      }, 
     ],
   },
   plugins: [
@@ -78,21 +60,34 @@ module.exports = {
             callback();
         })
     },
-    new webpack.DefinePlugin({
-      'process.env': {
-        'NODE_ENV': JSON.stringify('production')
-      }
-    }),
-    new webpack.optimize.UglifyJsPlugin({
-      compressor: {
-        warnings: false
-      }
-    }),
     new webpack.ProvidePlugin({
       "Hammer": "hammerjs/hammer"
     }),
   ],
   resolve: {
-    extensions: ['.js', '.jsx']
+    extensions: ['.js', '.jsx'],
+    // Conflict with libraries like qdt-lui that use the same version of React
+    // alias: {
+    //   'react': path.join(__dirname, './node_modules/react'),
+    //   'react-dom': path.join(__dirname, '/node_modules/react-dom'),
+    // }
+  },
+  optimization: {
+    minimizer: [
+      new UglifyJsPlugin({
+        include: /\.min\.js$/,
+        uglifyOptions: {
+          warnings: true,
+          parse: {},
+          compress: false,
+          mangle: true, // Note `mangle.properties` is `false` by default.
+          output: null,
+          toplevel: false,
+          nameCache: null,
+          ie8: false,
+          keep_fnames: false,
+        },
+      }),
+    ],
   },
 };
