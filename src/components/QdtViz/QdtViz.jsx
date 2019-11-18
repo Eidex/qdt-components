@@ -23,7 +23,7 @@ const QdtViz = ({
     qVizPromise.current = id ? qApp.visualization.get(id) : qApp.visualization.create(type, cols, options); // eslint-disable-line max-len
     getQViz(qVizPromise.current, chartId);
     const qViz = await qVizPromise.current;
-    qViz.setOptions(options);
+    // qViz.setOptions(options);
     await setLoading(false);
     qViz.show(node.current, { noSelections, noInteraction });
   };
@@ -58,7 +58,6 @@ const QdtViz = ({
     try {
       (async () => {
         const qViz = await qVizPromise.current;
-        console.log(qViz);
         qViz.setOptions(options);
       })();
     } catch (_error) {

@@ -19090,17 +19090,16 @@ var QdtViz_QdtViz = function QdtViz(_ref) {
 
             case 7:
               qViz = _context.sent;
-              qViz.setOptions(options);
-              _context.next = 11;
+              _context.next = 10;
               return setLoading(false);
 
-            case 11:
+            case 10:
               qViz.show(node.current, {
                 noSelections: noSelections,
                 noInteraction: noInteraction
               });
 
-            case 12:
+            case 11:
             case "end":
               return _context.stop();
           }
@@ -19221,10 +19220,9 @@ var QdtViz_QdtViz = function QdtViz(_ref) {
 
               case 2:
                 qViz = _context5.sent;
-                console.log(qViz);
                 qViz.setOptions(options);
 
-              case 5:
+              case 4:
               case "end":
                 return _context5.stop();
             }
