@@ -19157,8 +19157,9 @@ var QdtViz_QdtViz = function QdtViz(_ref) {
       qViz.setOptions(options);
     } catch (_error) {
       setError(_error);
-    }
-  }, [options, qViz]);
+    } // eslint-disable-next-line react-hooks/exhaustive-deps
+
+  }, [options]);
   return react_default.a.createElement(react_default.a.Fragment, null, error && react_default.a.createElement("div", null, error.message), loading // <Preloader width={width} height={height} paddingTop={(parseInt(height, 0)) ? (height / 2) - 10 : 0} />
   && react_default.a.createElement("div", {
     style: {

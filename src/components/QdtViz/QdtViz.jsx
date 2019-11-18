@@ -57,7 +57,8 @@ const QdtViz = ({
     } catch (_error) {
       setError(_error);
     }
-  }, [options, qViz]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [options]);
 
   return (
     <>
