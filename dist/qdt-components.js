@@ -19207,9 +19207,11 @@ var QdtViz_QdtViz = function QdtViz(_ref) {
   }, []);
   Object(react["useEffect"])(function () {
     try {
-      qVizPromise.current.then(function (qViz) {
-        return qViz.setOptions(options);
-      });
+      if (qVizPromise.current) {
+        qVizPromise.current.then(function (qViz) {
+          return qViz.setOptions(options);
+        });
+      }
     } catch (_error) {
       setError(_error);
     } // eslint-disable-next-line react-hooks/exhaustive-deps
