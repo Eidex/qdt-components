@@ -19207,28 +19207,9 @@ var QdtViz_QdtViz = function QdtViz(_ref) {
   }, []);
   Object(react["useEffect"])(function () {
     try {
-      asyncToGenerator_default()(
-      /*#__PURE__*/
-      regenerator_default.a.mark(function _callee5() {
-        var qViz;
-        return regenerator_default.a.wrap(function _callee5$(_context5) {
-          while (1) {
-            switch (_context5.prev = _context5.next) {
-              case 0:
-                _context5.next = 2;
-                return qVizPromise.current;
-
-              case 2:
-                qViz = _context5.sent;
-                qViz.setOptions(options);
-
-              case 4:
-              case "end":
-                return _context5.stop();
-            }
-          }
-        }, _callee5);
-      }))();
+      qVizPromise.current.then(function (qViz) {
+        return qViz.setOptions(options);
+      });
     } catch (_error) {
       setError(_error);
     } // eslint-disable-next-line react-hooks/exhaustive-deps

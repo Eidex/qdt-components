@@ -56,10 +56,7 @@ const QdtViz = ({
 
   useEffect(() => {
     try {
-      (async () => {
-        const qViz = await qVizPromise.current;
-        qViz.setOptions(options);
-      })();
+      qVizPromise.current.then((qViz) => qViz.setOptions(options));
     } catch (_error) {
       setError(_error);
     }
