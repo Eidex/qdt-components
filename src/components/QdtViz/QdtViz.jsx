@@ -64,7 +64,7 @@ const QdtViz = ({
       setError(_error);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [options]);
+  }, [JSON.stringify(options)]);
 
   return (
     <>
