@@ -148,7 +148,7 @@ QdtViz.defaultProps = {
   exportData: false,
   exportDataTitle: 'Export Data',
   exportDataOptions: { format: 'CSV_T', state: 'P' },
-  exportImg: true,
+  exportImg: false,
   exportImgTitle: 'Export Image',
   exportImgOptions: { width: 300, height: 400, format: 'JPG' },
   exportPdf: false,
