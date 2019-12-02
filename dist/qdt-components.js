@@ -19307,7 +19307,7 @@ QdtViz_QdtViz.defaultProps = {
     format: 'CSV_T',
     state: 'P'
   },
-  exportImg: false,
+  exportImg: true,
   exportImgTitle: 'Export Image',
   exportImgOptions: {
     width: 300,
