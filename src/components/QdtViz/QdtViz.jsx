@@ -56,15 +56,17 @@ const QdtViz = ({
 
   useEffect(() => {
     try {
-      console.log(qVizPromise.current);
+      console.log(qVizPromise);
       console.log(options);
       if (qVizPromise.current) {
+        console.log('reached');
         qVizPromise.current.then((qViz) => qViz.setOptions(options));
       }
     } catch (_error) {
       setError(_error);
     }
-  }, [options, qVizPromise]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [options, qVizPromise.current]);
 
   return (
     <>

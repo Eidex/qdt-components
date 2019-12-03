@@ -19207,18 +19207,20 @@ var QdtViz_QdtViz = function QdtViz(_ref) {
   }, []);
   Object(react["useEffect"])(function () {
     try {
-      console.log(qVizPromise.current);
+      console.log(qVizPromise);
       console.log(options);
 
       if (qVizPromise.current) {
+        console.log('reached');
         qVizPromise.current.then(function (qViz) {
           return qViz.setOptions(options);
         });
       }
     } catch (_error) {
       setError(_error);
-    }
-  }, [options, qVizPromise]);
+    } // eslint-disable-next-line react-hooks/exhaustive-deps
+
+  }, [options, qVizPromise.current]);
   return react_default.a.createElement(react_default.a.Fragment, null, error && react_default.a.createElement("div", null, error.message), loading // <Preloader width={width} height={height} paddingTop={(parseInt(height, 0)) ? (height / 2) - 10 : 0} />
   && react_default.a.createElement("div", {
     style: {
