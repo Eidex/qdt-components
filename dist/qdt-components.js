@@ -19207,6 +19207,8 @@ var QdtViz_QdtViz = function QdtViz(_ref) {
   }, []);
   Object(react["useEffect"])(function () {
     try {
+      console.log(options);
+
       if (qVizPromise.current) {
         qVizPromise.current.then(function (qViz) {
           return qViz.setOptions(options);
