@@ -6,7 +6,7 @@ import QdtButton from '../QdtButton/QdtButton';
 
 
 const QdtViz = ({
-  qAppPromise, id, type, cols, options, noSelections, noInteraction, width, height, minWidth, minHeight, exportData, exportDataTitle, exportDataOptions, exportImg, exportImgTitle, exportImgOptions, exportPdf, exportPdfTitle, exportPdfOptions, chartId, getQViz,
+  qAppPromise, id, type, cols, options, noSelections, noInteraction, width, height, marginLeft, minWidth, minHeight, exportData, exportDataTitle, exportDataOptions, exportImg, exportImgTitle, exportImgOptions, exportPdf, exportPdfTitle, exportPdfOptions, chartId, getQViz,
 }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -84,7 +84,7 @@ const QdtViz = ({
             <div
               ref={node}
               style={{
-                width, height, minWidth, minHeight,
+                width, height, marginLeft, minWidth, minHeight,
               }}
             />
             {exportData && (
@@ -118,6 +118,7 @@ QdtViz.propTypes = {
   noSelections: PropTypes.bool,
   noInteraction: PropTypes.bool,
   width: PropTypes.string,
+  marginLeft: PropTypes.string,
   height: PropTypes.string,
   minWidth: PropTypes.string,
   minHeight: PropTypes.string,
@@ -143,6 +144,7 @@ QdtViz.defaultProps = {
   noInteraction: false,
   width: '100%',
   height: '100%',
+  marginLeft: '0px',
   minWidth: 'auto',
   minHeight: 'auto',
   exportData: false,
