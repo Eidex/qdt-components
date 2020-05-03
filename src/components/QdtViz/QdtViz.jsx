@@ -1,9 +1,9 @@
+  
 import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import FontAwesome from 'react-fontawesome';
 // import Preloader from '../../utilities/Preloader';
 import QdtButton from '../QdtButton/QdtButton';
-
 
 const QdtViz = ({
   qAppPromise, id, type, cols, options, noSelections, noInteraction, width, height, minWidth, minHeight, exportData, exportDataTitle, exportDataOptions, exportImg, exportImgTitle, exportImgOptions, exportPdf, exportPdfTitle, exportPdfOptions, chartId, getQViz,

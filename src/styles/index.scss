@@ -333,7 +333,6 @@ th.active:after {
     }
 }
 
-
 /**********************
  * QdtSearch
 **********************/
@@ -347,38 +346,13 @@ th.active:after {
 }
 
 /**********************
- * PICASSO
+ * QdtSequencer
 **********************/
-.pic-tooltip-content { 
-    padding: 8px 15px !important;
-    .qdt-tooltip-header { 
-        .qdt-tooltip-header-box { 
-            position: relative;
-            display: inline-block;
-            width: 10px;
-            height: 12px;
-            left: -14px;
-            bottom: -2px;
-        }
-        .qdt-tooltip-header-title { 
-            display: inline-block;
-            position: relative;
-            left: -10px;
-        }
-        .qdt-tooltip-header-measure { 
-            display: inline-block;
-            text-align: right;
-        }
-    }
-    .text-right { text-align: right; }
-    .qdt-tooltip-row { 
-        display: block; 
-        .qdt-tooltip-col-label,
-        .qdt-tooltip-col-value { 
-            display: inline-block;
-            width: 50%;
-            padding-left: 5px;
-        }
-        .qdt-tooltip-col-value { text-align: right; }
-    }
+button:focus { outline: 0 !important; }
+.lui-icon-rotate-180 {
+    -webkit-transform: rotate(180deg);
+    -moz-transform: rotate(180deg);
+    -ms-transform: rotate(180deg);
+    -o-transform: rotate(180deg);
+    transform: rotate(180deg);
 }

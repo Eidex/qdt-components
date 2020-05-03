@@ -1,18 +1,64 @@
-import { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
+import {
+  useCallback, useRef, useReducer, useEffect,
+} from 'react';
+import merge from 'deepmerge';
+// import useSequencer from './useSequencer';
 
-let qDoc = null;
-let qObject = null;
-let qLayout = null;
-let selections = null;
+const initialState = {
+  qDoc: null,
+  qObject: null,
+  qData: null,
+  qLayout: null,
+  selections: null,
+};
 
-const useListObject = ({
-  qDocPromise, qPage, cols, qListObjectDef, qSortByAscii, qSortByLoadOrder, autoSortByState,
-}) => {
-  const [qData, setQData] = useState(null);
+function reducer(state, action) {
+  const {
+    payload: {
+      qData, qLayout, selections,
+    }, type,
+  } = action;
+  switch (type) {
+    case 'update':
+      return {
+        ...state, qData, qLayout, selections,
+      };
+    default:
+      throw new Error();
+  }
+}
+
+const initialProps = {
+  autoSortByState: 1,
+  qSortByAscii: 1,
+  qSortByLoadOrder: 1,
+  cols: null,
+  qListObjectDef: null,
+  qPage: {
+    qTop: 0,
+    qLeft: 0,
+    qWidth: 1,
+    qHeight: 1000,
+  },
+};
+
+const useListObject = (props) => {
+  const {
+    qPage: qPageProp, cols, qListObjectDef, qSortByAscii, qSortByLoadOrder, autoSortByState,
+  } = merge(initialProps, props);
+  const { qDocPromise } = props;
+
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  const {
+    qData, qLayout, selections,
+  } = state;
+
+  const qObject = useRef(null);
+  const qPage = useRef(qPageProp);
 
   /** Generate the Definition file */
-  const generateQProp = (currentColumn = 0) => {
+  const generateQProp = useCallback((currentColumn = 0) => {
     const qProp = { qInfo: { qType: 'visualization' } };
     if (qListObjectDef) {
       qProp.qListObjectDef = qListObjectDef;
@@ -22,7 +68,7 @@ const useListObject = ({
         || (typeof col === 'object' && col.qLibraryId && col.qType && col.qType === 'dimension'))
         .map((col) => {
           if (typeof col === 'string') {
-            return { qDef: { qFieldDefs: [col], qSortCriterias: [{ qSortByAscii, qSortByLoadOrder }] } };
+            return { qDef: { qFieldDefs: [col], qSortCriterias: [{ qSortByLoadOrder, qSortByAscii }] } };
           }
           return col;
         });
@@ -36,100 +82,55 @@ const useListObject = ({
       };
     }
     return qProp;
-  };
+  }, [autoSortByState, cols, qListObjectDef, qSortByAscii, qSortByLoadOrder]);
 
-  const getLayout = async () => {
-    const _qLayout = await qObject.getLayout();
-    return _qLayout;
-  };
+  const getLayout = useCallback(() => qObject.current.getLayout(), []);
 
-  const getData = async (qTop) => {
-    const qDataPages = await qObject.getListObjectData('/qListObjectDef', [{ ...qPage, qTop }]);
+  const getData = useCallback(async () => {
+    const qDataPages = await qObject.current.getListObjectData('/qListObjectDef', [qPage.current]);
     return qDataPages[0];
-  };
-
-  const update = async (qTopPassed = 0) => {
-    // Short-circuit evaluation because one line destructuring on Null values breaks on the browser.
-    const { qDataGenerated } = qData || {};
-    const { qArea } = qDataGenerated || {};
-    const { qTop: qTopGenerated } = qArea || {};
-    const qTop = (qTopPassed) || qTopGenerated;
-    qLayout = await getLayout();
-    const _qData = await getData(qTop);
-    selections = _qData.qMatrix.filter((row) => row[0].qState === 'S');
-    setQData(_qData);
-  };
-
-  const offset = (qTop) => update(qTop);
-
-  const beginSelections = async () => {
-    // Make sure we close all other open selections. We usually get that when we have morethan one dropDown in the same page and while one is open, we click on the second one
-    // await qDoc.abortModal(false);
-    await qObject.beginSelections(['/qListObjectDef']);
-  };
-
-  const endSelections = async (qAccept) => {
-    await qObject.endSelections(qAccept);
-  };
-
-  const select = async (qElemNumber, toggle = true, ignoreLock = false) => {
-    await qObject.selectListObjectValues('/qListObjectDef', [qElemNumber], toggle, ignoreLock);
-  };
-
-  const searchListObjectFor = async (string) => {
-    await qObject.searchListObjectFor('/qListObjectDef', string);
-  };
-
-  const acceptListObjectSearch = async (ignoreLock = false) => {
-    await qObject.acceptListObjectSearch('/qListObjectDef', true, ignoreLock);
-  };
-
-  const applyPatches = async (patches) => {
-    await qObject.applyPatches(patches);
-  };
-
-  useEffect(() => {
-    (async () => {
-      const qProp = await generateQProp();
-      qDoc = await qDocPromise;
-      qObject = await qDoc.createSessionObject(qProp);
-      qObject.on('changed', () => { update(); });
-      update();
-    })();
-    return () => {
-      const { id } = qObject;
-      qDoc.destroySessionObject(id);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const update = useCallback(async () => {
+    const _qLayout = await getLayout();
+    const _qData = await getData();
+    const _selections = _qData.qMatrix.filter((row) => row[0].qState === 'S');
+    dispatch({ type: 'update', payload: { qData: _qData, qLayout: _qLayout, selections: _selections } });
+  }, [getData, getLayout]);
+
+  const changePage = useCallback((newPage) => {
+    qPage.current = { ...qPage.current, ...newPage };
+    update();
+  }, [update]);
+
+  const beginSelections = useCallback(async () => qObject.current.beginSelections(['/qListObjectDef']), []);
+
+  const endSelections = useCallback((qAccept) => qObject.current.endSelections(qAccept), []);
+
+  const select = useCallback((qElemNumber, toggle = true, ignoreLock = false) => qObject.current.selectListObjectValues('/qListObjectDef', [qElemNumber], toggle, ignoreLock), []);
+
+  const searchListObjectFor = useCallback((string) => qObject.current.searchListObjectFor('/qListObjectDef', string), []);
+
+  const acceptListObjectSearch = useCallback((ignoreLock = false) => qObject.current.acceptListObjectSearch('/qListObjectDef', true, ignoreLock), []);
+
+  const applyPatches = useCallback((patches) => qObject.current.applyPatches(patches), []);
+
+  const clearSelections = useCallback(() => qObject.current.clearSelections('/qListObjectDef'), []);
+
+  useEffect(() => {
+    if (!qDocPromise || qObject.current) return;
+    (async () => {
+      const qProp = generateQProp();
+      const qDoc = await qDocPromise;
+      qObject.current = await qDoc.createSessionObject(qProp);
+      qObject.current.on('changed', () => { update(); });
+      update();
+    })();
+  }, [generateQProp, qDocPromise, update]);
+
   return {
-    qLayout, qData, offset, select, beginSelections, endSelections, searchListObjectFor, acceptListObjectSearch, applyPatches, selections,
+    qLayout, qData, changePage, select, beginSelections, endSelections, searchListObjectFor, acceptListObjectSearch, applyPatches, selections, clearSelections,
   };
-};
-
-useListObject.propTypes = {
-  qDocPromise: PropTypes.object.isRequired,
-  cols: PropTypes.array,
-  qListObjectDef: PropTypes.object,
-  qPage: PropTypes.object,
-  autoSortByState: PropTypes.bool,
-  qSortByAscii: PropTypes.oneOf([1, 0, -1]),
-  qSortByLoadOrder: PropTypes.oneOf([1, 0, -1]),
-};
-
-useListObject.defaultProps = {
-  autoSortByState: 1,
-  qSortByAscii: 1,
-  qSortByLoadOrder: 1,
-  cols: null,
-  qListObjectDef: null,
-  qPage: {
-    qTop: 0,
-    qLeft: 0,
-    qWidth: 1,
-    qHeight: 100,
-  },
 };
 
 export default useListObject;

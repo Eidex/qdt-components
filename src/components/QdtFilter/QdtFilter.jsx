@@ -13,49 +13,44 @@
  * DropDown, List or Tabs
 */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import {
   LuiDropdown, LuiList, LuiSearch, LuiTabset,
 } from '../QdtLui';
 import useListObject from '../../hooks/useListObject';
-import QdtVirtualScroll from '../QdtVirtualScroll/QdtVirtualScroll';
 import DropdownItemList from './DropdownItemList';
 import ExpandedHorizontalTab from './ExpandedHorizontalTab';
 import StateCountsBar from './StateCountsBar';
 import '../../styles/index.scss';
 
-let searchListInputValue = '';
-let qStateCounts = 0;
-let totalStateCounts = {};
 
 /** The Actual Component */
 const QdtFilter = ({
   qDocPromise, cols, qPage, showStateInDropdown, single, hideStateCountsBar, expanded, expandedHorizontal, expandedHorizontalSense, placeholder,
 }) => {
   const [dropdownOpen, setDropDownOpen] = useState(false);
-  // const [searchListInputValue, setSearchListInputValue] = useState('');
+  const [value, setValue] = useState('');
+  // let searchListInputValue = '';
 
   const {
-    beginSelections, endSelections, qLayout, qData, offset, selections, select, searchListObjectFor, acceptListObjectSearch,
+    beginSelections, endSelections, qLayout, qData, selections, select, searchListObjectFor, acceptListObjectSearch,
   } = useListObject({ qDocPromise, cols, qPage });
 
-
   const _searchListObjectFor = (event) => {
-    searchListInputValue = event.target.value;
-    // offset(0);
+    setValue(event.target.value);
     searchListObjectFor(event.target.value);
   };
 
   /** Clear all of the selections */
   const clear = () => {
-    searchListInputValue = '';
+    setValue('');
     searchListObjectFor('');
   };
 
   const _acceptListObjectSearch = (event) => {
     if (event.charCode === 13) {
-      searchListInputValue = '';
+      setValue('');
       acceptListObjectSearch();
     }
   };
@@ -73,69 +68,51 @@ const QdtFilter = ({
 
   /** Make Selections */
   const _select = (event) => {
-    const { qElemNumber, qState } = event.currentTarget.dataset; // qText
-    if (qState === 'S') { select(Number(qElemNumber)); } else { select(Number(qElemNumber), !single); }
-    if (single) toggle();
+    const { qElemNumber, qState } = event.currentTarget.dataset;  //eslint-disable-line
+    // FKA - This is broken. I don't know what it was for, but it breaks selections in regular filters.
+    // const toggleSelections = !(((!single && qState === 'S') || (expandedHorizontal) || single));
+    select(Number(qElemNumber), true);
+    if (single && (!expanded || !ExpandedHorizontalTab)) toggle();
+    if (expandedHorizontal) endSelections(true);
   };
-
-  useEffect(() => {
-    if (qData) {
-      qStateCounts = qLayout.qListObject.qDimensionInfo.qStateCounts;
-      totalStateCounts = Object.values(qStateCounts).reduce((a, b) => a + b);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [qData]);
 
   return (
     <>
-      { qData && !expanded && !expandedHorizontal
+      { qData && qLayout && !expanded && !expandedHorizontal
         && (
         <LuiDropdown isOpen={dropdownOpen} toggle={() => toggle()}>
           <span>
             {!showStateInDropdown && placeholder}
             {(showStateInDropdown && selections && selections.length === 0) && placeholder}
-            {(showStateInDropdown && selections && selections.length === 1) && `${placeholder}: ${selections[0][0].qText}`}
-            {(showStateInDropdown && selections && selections.length > 1) && `${placeholder}: ${selections.length} of ${totalStateCounts}`}
+            {(showStateInDropdown && selections && selections.length === 1) && `${placeholder}${placeholder && ':'} ${selections[0][0].qText}`}
+            {(showStateInDropdown && selections && selections.length > 1) && `${placeholder}${placeholder && ':'} ${selections.length} of ${qLayout.qListObject.qSize.qcy}`}
           </span>
           <LuiList style={{ width: '15rem' }}>
             <LuiSearch
-              value={searchListInputValue}
+              value={value}
               clear={clear}
               onChange={_searchListObjectFor}
               onKeyPress={_acceptListObjectSearch}
+              // onChange={_searchListObjectFor}
+              // onKeyPress={handleKeyPress}
+              // onGo={showGo ? _acceptListObjectSearch : null}
             />
-            <QdtVirtualScroll
-              qData={qData}
-              qcy={qLayout.qListObject.qSize.qcy}
-              Component={DropdownItemList}
-              componentProps={{ qData, select: _select }}
-              offset={offset}
-              rowHeight={38}
-              viewportHeight={190}
-            />
+            <DropdownItemList qData={qData} select={_select} dropdownOpen={dropdownOpen} />
           </LuiList>
-          {!hideStateCountsBar
-            && <StateCountsBar totalStateCounts={totalStateCounts} selections={selections} />}
+          {!hideStateCountsBar && qLayout
+            && <StateCountsBar qStateCounts={qLayout.qListObject.qDimensionInfo.qStateCounts} qcy={qLayout.qListObject.qSize.qcy} />}
         </LuiDropdown>
         )}
-      { qData && expanded
+      { qData && qLayout && expanded
         && (
         <LuiList style={{ width: '15rem' }}>
           <LuiSearch
-            value={searchListInputValue}
+            value={value}
             clear={clear}
             onChange={_searchListObjectFor}
-            onKeyPress={acceptListObjectSearch}
+            onKeyPress={_acceptListObjectSearch}
           />
-          <QdtVirtualScroll
-            qData={qData}
-            qcy={qLayout.qListObject.qSize.qcy}
-            Component={DropdownItemList}
-            componentProps={{ select }}
-            offset={offset}
-            rowHeight={38}
-            viewportHeight={190}
-          />
+          <DropdownItemList qData={qData} select={_select} dropdownOpen={dropdownOpen} />
         </LuiList>
         )}
       { qData && expandedHorizontal
@@ -146,7 +123,7 @@ const QdtFilter = ({
         >
           <ExpandedHorizontalTab
             qData={qData}
-            select={select}
+            select={_select}
             expandedHorizontalSense={expandedHorizontalSense}
           />
         </LuiTabset>
@@ -173,7 +150,7 @@ QdtFilter.defaultProps = {
     qTop: 0,
     qLeft: 0,
     qWidth: 1,
-    qHeight: 100,
+    qHeight: 10000,
   },
   single: false,
   hideStateCountsBar: false,

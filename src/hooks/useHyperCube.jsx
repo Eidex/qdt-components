@@ -1,18 +1,70 @@
-import { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
+import {
+  useCallback, useRef, useReducer, useEffect,
+} from 'react';
+import merge from 'deepmerge';
 
-let qDoc = null;
-let qObject = null;
-let qLayout = null;
-let selections = null;
-let qRData = null;
+const initialState = {
+  qData: null,
+  qRData: null,
+  qLayout: null,
+  selections: null,
+};
 
-const useHyperCube = ({
-  qDocPromise, qPage, cols, qHyperCubeDef, qSortByAscii, qSortByLoadOrder, qInterColumnSortOrder, qSuppressZero, qSortByExpression, qSuppressMissing, qExpression, getQRData,
-}) => {
-  const [qData, setQData] = useState(null);
+function reducer(state, action) {
+  const {
+    payload: {
+      qData, qRData, qLayout, selections,
+    }, type,
+  } = action;
+  switch (type) {
+    case 'update':
+      return {
+        ...state, qData, qLayout, selections,
+      };
+    case 'updateReducedData':
+      return {
+        ...state, qRData,
+      };
+    default:
+      throw new Error();
+  }
+}
 
-  const generateQProp = () => {
+const initialProps = {
+  cols: null,
+  qHyperCubeDef: null,
+  qPage: {
+    qTop: 0,
+    qLeft: 0,
+    qWidth: 10,
+    qHeight: 100,
+  },
+  qSortByAscii: 1,
+  qSortByLoadOrder: 1,
+  qInterColumnSortOrder: [],
+  qSuppressZero: false,
+  qSortByExpression: 0,
+  qSuppressMissing: false,
+  qExpression: null,
+  getQRData: false,
+};
+
+const useHyperCube = (props) => {
+  const {
+    qPage: qPageProp, cols, qHyperCubeDef, qSortByAscii, qSortByLoadOrder, qInterColumnSortOrder, qSuppressZero, qSortByExpression, qSuppressMissing, qExpression, getQRData,
+  } = merge(initialProps, props);
+  const { qDocPromise } = props;
+
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  const {
+    qData, qRData, qLayout, selections,
+  } = state;
+
+  const qObject = useRef(null);
+  const qPage = useRef(qPageProp);
+
+  const generateQProp = useCallback(() => {
     const qProp = { qInfo: { qType: 'visualization' } };
     if (qHyperCubeDef) {
       const _qHyperCubeDef = qHyperCubeDef;
@@ -63,116 +115,65 @@ const useHyperCube = ({
       qSuppressMissing,
     };
     return qProp;
-  };
+  }, [cols, qExpression, qHyperCubeDef, qInterColumnSortOrder, qSortByAscii, qSortByExpression, qSortByLoadOrder, qSuppressMissing, qSuppressZero]);
 
-  const getLayout = async () => {
-    const _qLayout = await qObject.getLayout();
-    return _qLayout;
-  };
+  const getLayout = useCallback(() => qObject.current.getLayout(), []);
 
-  const getData = async (qTop) => {
-    const qDataPages = await qObject.getHyperCubeData('/qHyperCubeDef', [{ ...qPage, qTop }]);
+  const getData = useCallback(async () => {
+    const qDataPages = await qObject.current.getHyperCubeData('/qHyperCubeDef', [qPage.current]);
     return qDataPages[0];
-  };
+  }, []);
 
-  const getReducedData = async () => {
-    const { qWidth } = qPage;
+  const getReducedData = useCallback(() => async () => {
+    const { qWidth } = qPage.current;
     const _qPage = {
       qTop: 0,
       qLeft: 0,
       qWidth,
       qHeight: Math.round(10000 / qWidth),
     };
-    const qDataPages = await qObject.getHyperCubeReducedData('/qHyperCubeDef', [{ ..._qPage }], -1, 'D1');
+    const qDataPages = await qObject.current.getHyperCubeReducedData('/qHyperCubeDef', [_qPage], -1, 'D1');
     return qDataPages[0];
-  };
-
-  const update = async (qTopPassed = null) => {
-    // Short-circuit evaluation because one line destructuring on Null values breaks on the browser.
-    const { qDataGenerated } = qData || {};
-    const { qArea } = qDataGenerated || {};
-    const { qTop: qTopGenerated } = qArea || {};
-    // We need to be able to pass qTopPassed=0 to force the update with qTop=0
-    const qTop = (qTopPassed !== null && qTopPassed >= 0) ? qTopPassed : qTopGenerated;
-    qLayout = await getLayout();
-    const _qData = await getData(qTop);
-    selections = _qData.qMatrix.filter((row) => row[0].qState === 'S');
-    setQData(_qData);
-  };
-
-  const offset = (qTop) => update(qTop);
-
-  const beginSelections = async () => {
-    // await qDoc.abortModal(false);
-    await qObject.beginSelections(['/qHyperCubeDef']);
-  };
-
-  const endSelections = async (qAccept) => {
-    await qObject.endSelections(qAccept);
-    // await qDoc.abortModal(qAccept);
-  };
-
-  const select = async (dimIndex, _selections, toggle = true) => {
-    await qObject.selectHyperCubeValues('/qHyperCubeDef', dimIndex, _selections, toggle);
-  };
-
-  const applyPatches = async (patches) => {
-    await qObject.applyPatches(patches);
-  };
-
-  useEffect(() => {
-    (async () => {
-      const qProp = await generateQProp();
-      qDoc = await qDocPromise;
-      qObject = await qDoc.createSessionObject(qProp);
-      qObject.on('changed', () => { update(); });
-      if (getQRData) qRData = await getReducedData();
-      update();
-    })();
-    return () => {
-      const { id } = qObject;
-      qDoc.destroySessionObject(id);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const update = useCallback(async () => {
+    const _qLayout = await getLayout();
+    const _qData = await getData();
+    const _selections = _qData.qMatrix.filter((row) => row[0].qState === 'S');
+    dispatch({ type: 'update', payload: { qData: _qData, qLayout: _qLayout, selections: _selections } });
+    if (getQRData) {
+      const _qRData = await getReducedData();
+      dispatch({ type: 'updateReducedData', payload: { qRData: _qRData } });
+    }
+  }, [getData, getLayout, getQRData, getReducedData]);
+
+  const changePage = useCallback((newPage) => {
+    qPage.current = { ...qPage.current, ...newPage };
+    update();
+  }, [update]);
+
+  const beginSelections = useCallback(() => qObject.current.beginSelections(['/qHyperCubeDef']), []);
+
+  const endSelections = useCallback((qAccept) => qObject.current.endSelections(qAccept), []);
+
+  const select = useCallback((qElemNumber, _selections, toggle = true) => qObject.current.selectHyperCubeValues('/qHyperCubeDef', qElemNumber, _selections, toggle), []);
+
+  const applyPatches = useCallback((patches) => qObject.current.applyPatches(patches), []);
+
+  useEffect(() => {
+    if (qObject.current) return;
+    (async () => {
+      const qProp = generateQProp();
+      const qDoc = await qDocPromise;
+      qObject.current = await qDoc.createSessionObject(qProp);
+      qObject.current.on('changed', () => { update(); });
+      update();
+    })();
+  }, [generateQProp, qDocPromise, update]);
+
   return {
-    beginSelections, endSelections, qLayout, qData, qRData, offset, selections, select, applyPatches,
+    beginSelections, endSelections, qLayout, qData, qRData, changePage, selections, select, applyPatches,
   };
-};
-
-useHyperCube.propTypes = {
-  qDocPromise: PropTypes.object.isRequired,
-  cols: PropTypes.array,
-  qHyperCubeDef: PropTypes.object,
-  qPage: PropTypes.object,
-  qSortByAscii: PropTypes.oneOf([1, 0, -1]),
-  qSortByLoadOrder: PropTypes.oneOf([1, 0, -1]),
-  qInterColumnSortOrder: PropTypes.array,
-  qSuppressZero: PropTypes.bool,
-  qSortByExpression: PropTypes.oneOf([1, 0, -1]),
-  qSuppressMissing: PropTypes.bool,
-  qExpression: PropTypes.object,
-  getQRData: PropTypes.bool, // Engine breaks on some HyperCubes
-};
-
-useHyperCube.defaultProps = {
-  cols: null,
-  qHyperCubeDef: null,
-  qPage: {
-    qTop: 0,
-    qLeft: 0,
-    qWidth: 10,
-    qHeight: 100,
-  },
-  qSortByAscii: 1,
-  qSortByLoadOrder: 1,
-  qInterColumnSortOrder: [],
-  qSuppressZero: false,
-  qSortByExpression: 0,
-  qSuppressMissing: false,
-  qExpression: null,
-  getQRData: false,
 };
 
 export default useHyperCube;

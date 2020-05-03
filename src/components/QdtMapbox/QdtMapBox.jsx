@@ -13,13 +13,13 @@ let propertyChildren = null;
 let propertyChildrenWithColors = null;
 
 const QdtMapBox = ({
-  width, height, minWidth, minHeight, accessToken, style, center, zoom, legend, circleRadius, getData, getAllDataInterval, qPage, ...hyperCubeProps
+  width, height, minWidth, minHeight, accessToken, style, center, zoom, pitch, bearing, legend, circleRadius, getData, getAllDataInterval, qPage, tooltip, extraLayers, createLayers, ...hyperCubeProps
 }) => {
   const node = useRef(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const { qData, qLayout, offset } = useHyperCube({ qPage, ...hyperCubeProps });
+  const { qData, qLayout, changePage } = useHyperCube({ qPage, ...hyperCubeProps });
   const property = hyperCubeProps.cols[3];
-  const handleCallback = useCallback(() => getData(qData, qLayout), [getData, qData, qLayout]);
+  const handleCallback = useCallback(() => getData(qData, qLayout, map), [getData, qData, qLayout]);
 
   function buildFeatureSimplified(obj) {
     const featureObj = {
@@ -34,6 +34,12 @@ const QdtMapBox = ({
         coordinates: [obj.lng, obj.lat],
       },
     };
+
+    // if no tooltip callback specified, do not add description property
+    if (tooltip !== null) {
+      featureObj.properties.description = tooltip(obj);
+    }
+
     return featureObj;
   }
 
@@ -76,11 +82,10 @@ const QdtMapBox = ({
     const layer = {
       id: 'dots',
       type: 'circle',
-      source: 'users',
+      source: 'hyperCubeData',
       paint: {
         'circle-stroke-width': 0,
         'circle-radius': circleRadius,
-        // 'circle-color': ['match', ['get', property], 'Male', '#3399CC', 'Female', '#CC6666', '#FFF'],
         'circle-color': match,
         'circle-opacity': 1,
       },
@@ -94,12 +99,52 @@ const QdtMapBox = ({
   // Using the GeoJSON and map object, we create a Layer for the dots and add them to the map
   // This function also sets up the periodic update to cycle through the dots
   const buildMap = () => {
-    map.addSource('users', {
+    map.addSource('hyperCubeData', {
       type: 'geojson',
       data: GeoJSON,
     });
     const layer = buildLayer();
     map.addLayer(layer);
+    if (extraLayers && extraLayers.length) {
+      extraLayers.map((_layer) => map.addLayer(_layer));
+    }
+
+    // ==== Tooltip Start ===== //
+    if (tooltip !== null) {
+      // Create a popup, but don't add it to the map yet.
+      const popup = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+        className: 'qdt-components-mb-tooltip',
+      });
+
+      map.on('mouseenter', 'dots', (e) => {
+        // Change the cursor style as a UI indicator.
+        map.getCanvas().style.cursor = 'pointer';
+
+        const coordinates = e.features[0].geometry.coordinates.slice();
+        const { description } = e.features[0].properties;
+        // Ensure that if the map is zoomed out such that multiple
+        // copies of the feature are visible, the popup appears
+        // over the copy being pointed to.
+        while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+          coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+        }
+
+        // Populate the popup and set its coordinates
+        // based on the feature found.
+        popup
+          .setLngLat(coordinates)
+          .setHTML(description)
+          .addTo(map);
+      });
+
+      map.on('mouseleave', 'dots', () => {
+        map.getCanvas().style.cursor = '';
+        popup.remove();
+      });
+    }
+    // ==== End Tooltip ======= //
   };
 
   // ==========================================================================
@@ -117,7 +162,7 @@ const QdtMapBox = ({
     });
     if (GeoJSON) {
       GeoJSON = { ...GeoJSON, features: [...GeoJSON.features, ...nextChunk] };
-      map.getSource('users').setData(GeoJSON);
+      map.getSource('hyperCubeData').setData(GeoJSON);
     } else {
       GeoJSON = buildGeoJSON();
       buildMap();
@@ -131,10 +176,12 @@ const QdtMapBox = ({
       style, // stylesheet location
       center, // starting position [lng, lat]
       zoom, // starting zoom
+      pitch, // Camera Angle
+      bearing, // Compass Direction
     });
     // After Map is loaded, update GeoJSON & save Map object before continuing
     map.on('load', () => {
-      updateLayers(qData); // Draw the first set of data, in case we load all
+      if (createLayers) updateLayers(qData); // Draw the first set of data, in case we load all
       setIsLoaded(true);
       mapData = [...mapData, ...qData.qMatrix];
     });
@@ -147,7 +194,7 @@ const QdtMapBox = ({
       if (currentPage === totalPages) {
         clearInterval(populateDataID);
       } else {
-        offset(currentPage * qPage.qHeight);
+        changePage({ qTop: currentPage * qPage.qHeight });
         currentPage += 1;
       }
     }, getAllDataInterval * 1000);
@@ -156,11 +203,11 @@ const QdtMapBox = ({
   useEffect(() => {
     if (qData && !isLoaded) {
       if (getAllDataInterval) getAllData();
-      createPropertyChilderFromQData();
+      if (createLayers) createPropertyChilderFromQData();
       mapInit();
     }
     if (qData && getData) handleCallback();
-    if (isLoaded) updateLayers(qData);
+    if (isLoaded && createLayers) updateLayers(qData);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [qData, qLayout]);
 
@@ -199,6 +246,8 @@ QdtMapBox.propTypes = {
   style: PropTypes.string,
   center: PropTypes.array,
   zoom: PropTypes.number,
+  pitch: PropTypes.number,
+  bearing: PropTypes.number,
   width: PropTypes.string,
   height: PropTypes.string,
   minWidth: PropTypes.string,
@@ -217,6 +266,9 @@ QdtMapBox.propTypes = {
   qSortByExpression: PropTypes.oneOf([1, 0, -1]),
   qSuppressMissing: PropTypes.bool,
   qExpression: PropTypes.object,
+  extraLayers: PropTypes.array,
+  createLayers: PropTypes.bool,
+  tooltip: PropTypes.func,
 };
 
 QdtMapBox.defaultProps = {
@@ -224,6 +276,8 @@ QdtMapBox.defaultProps = {
   style: 'mapbox://styles/mapbox/streets-v11',
   center: [-74.50, 40],
   zoom: 4,
+  pitch: 0, // https://docs.mapbox.com/mapbox-gl-js/api/#cameraoptions
+  bearing: 0,
   width: '100%',
   height: '100%',
   minWidth: 'auto',
@@ -247,6 +301,9 @@ QdtMapBox.defaultProps = {
   qSortByExpression: 0,
   qSuppressMissing: true,
   qExpression: null,
+  extraLayers: null,
+  createLayers: true,
+  tooltip: null,
 };
 
 export default QdtMapBox;

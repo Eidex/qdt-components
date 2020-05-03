@@ -7,14 +7,13 @@ import useHyperCube from '../../hooks/useHyperCube';
 import 'react-table/react-table.css';
 import '../../styles/index.scss';
 
-// TODO - handle if qInterColumnSortOrder is set, instead of just overriding it
 // TODO - set qColumnOrder in useHyperCube so it can be used here.
 
 const QdtTable = ({
-  qDocPromise, cols, qPage, style,
+  qDocPromise, cols, qPage, style, minRows, showPageSizeOptions, disableSelections,
 }) => {
   const {
-    qLayout, qData, offset, select, applyPatches, //eslint-disable-line
+    qLayout, qData, changePage, select, applyPatches, //eslint-disable-line
   } = useHyperCube({ qDocPromise, cols, qPage });
 
   const columns = useMemo(() => (
@@ -23,41 +22,67 @@ const QdtTable = ({
         ...qLayout.qHyperCube.qDimensionInfo.map((col, index) => ({
           Header: col.qFallbackTitle,
           accessor: (d) => d[index].qText,
+          colorIndex: col.qAttrExprInfo.findIndex((attr) => attr.id === 'color'),
           defaultSortDesc: col.qSortIndicator === 'D',
           id: col.qFallbackTitle,
           qInterColumnIndex: index,
           qPath: `/qHyperCubeDef/qDimensions/${index}`,
           qSortIndicator: col.qSortIndicator,
           qReverseSort: col.qReverseSort,
+          // getProps: (state, rowInfo) => {
+          //   console.log(rowInfo);
+          // },
         })),
         ...qLayout.qHyperCube.qMeasureInfo.map((col, index) => ({
           Header: col.qFallbackTitle,
           accessor: (d) => d[index + qLayout.qHyperCube.qDimensionInfo.length].qText,
+          colorIndex: col.qAttrExprInfo.findIndex((attr) => attr.id === 'color'),
           defaultSortDesc: col.qSortIndicator === 'D',
           id: col.qFallbackTitle,
           qInterColumnIndex: index + qLayout.qHyperCube.qDimensionInfo.length,
           qPath: `/qHyperCubeDef/qMeasures/${index}`,
           qSortIndicator: col.qSortIndicator,
           qReverseSort: col.qReverseSort,
+          // getProps: (state, rowInfo) => {
+          //   console.log(rowInfo);
+          // },
         })),
       ]
       : []
   ), [qLayout]);
 
-  const pages = useMemo(() => (qLayout && qPage) && Math.ceil(qLayout.qHyperCube.qSize.qcy / qPage.qHeight), [qLayout, qPage]);
-
-  const [page, setPage] = useState(0);
+  // loading
+  const [loading, setLoading] = useState(true);  //eslint-disable-line
   useEffect(() => {
-    if (page >= pages) {
-      setPage(0);
-    }
-  }, [page, pages]);
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    setLoading(false);
+    if (qData) setLoading(false);
   }, [qData]);
 
-  const handlePageChange = useCallback((pageIndex) => { setPage(pageIndex); setLoading(true); offset(pageIndex * qPage.qHeight); }, [offset, qPage.qHeight]);
+  // page size
+  const [pageSize, setPageSize] = useState(qPage.qHeight);
+
+  // page
+  const [page, _setPage] = useState(0);
+  const setPage = useCallback((_page) => {
+    setLoading(true);
+    _setPage(_page);
+    changePage({ qTop: _page * pageSize });
+  }, [changePage, pageSize]);
+  window.setPage = setPage;
+
+  // pages
+  const [pages, _setPages] = useState(0);
+  const setPages = useCallback((_pages) => {
+    if (page >= _pages) {
+      setPage(0);
+    }
+    _setPages(_pages);
+  }, [page, setPage]);
+  useEffect(() => {
+    if (!qLayout) return;
+    setPages(Math.ceil(qLayout.qHyperCube.qSize.qcy / pageSize));
+  }, [qLayout, pageSize, setPage, setPages]);
+
+  const handlePageChange = useCallback((pageIndex) => { setPage(pageIndex); }, [setPage]);
   const handleSortedChange = useCallback(async (newSorted, column) => {
     setLoading(true);
     // If no sort is set, we need to set a default sort order
@@ -76,12 +101,12 @@ const QdtTable = ({
           {
             qOp: 'add',
             qPath: `${column.qPath}/qSortBy`,
-            qValue: JSON.stringify([{ qSortByLoadOrder: 1 }]),
+            qValue: JSON.stringify({ qSortByLoadOrder: 1 }),
           },
         ]);
       }
     }
-    applyPatches([
+    await applyPatches([
       {
         qOp: 'replace',
         qPath: `${column.qPath}/qDef/qReverseSort`,
@@ -90,10 +115,17 @@ const QdtTable = ({
       {
         qOp: 'replace',
         qPath: '/qHyperCubeDef/qInterColumnSortOrder',
-        qValue: JSON.stringify([column.qInterColumnIndex]),
+        qValue: JSON.stringify([...qLayout.qHyperCube.qEffectiveInterColumnSortOrder].sort((a, b) => (a === column.qInterColumnIndex ? -1 : b === column.qInterColumnIndex ? 1 : 0))), //eslint-disable-line
       },
     ]);
-  }, [applyPatches]);
+    setPage(0);
+  }, [applyPatches, qLayout, setPage]);
+  const handlePageSizeChange = useCallback((_pageSize) => {  //eslint-disable-line
+    setPageSize(_pageSize);
+    changePage({ qHeight: _pageSize, qTop: page * _pageSize });
+  }, [changePage, page]);
+
+  console.log(qLayout);
 
   return (
     <div>
@@ -104,23 +136,33 @@ const QdtTable = ({
         pages={pages}
         page={page}
         loading={loading}
+        showPageJump={false}
         onPageChange={handlePageChange}
         onSortedChange={handleSortedChange}
-        defaultPageSize={qPage.qHeight}
-        showPageSizeOptions={false}
+        defaultPageSize={pageSize}
+        minRows={minRows}
+        showPageSizeOptions={showPageSizeOptions}
+        onPageSizeChange={handlePageSizeChange}
         multiSort={false}
         className="-striped"
         style={style}
-        getTdProps={(_, rowInfo, column) => ({
-          onClick: (e, handleOriginal) => {
-            if ((column && rowInfo) && column.qPath.includes('qDimensions') && rowInfo.original[column.qInterColumnIndex].qstate !== 'L') {
-              select(column.qInterColumnIndex, [rowInfo.original[column.qInterColumnIndex].qElemNumber]);
-            }
-            if (handleOriginal) {
-              handleOriginal();
-            }
-          },
-        })}
+        getTdProps={(_page, rowInfo, column) => {
+          const _style = {};
+          if (column.colorIndex !== -1) {
+            _style.color = rowInfo.original[column.qInterColumnIndex].qAttrExps.qValues[column.colorIndex].qText;
+          }
+          return {
+            style: _style,
+            onClick: (e, handleOriginal) => {
+              if (!disableSelections && (column && rowInfo) && column.qPath.includes('qDimensions') && rowInfo.original[column.qInterColumnIndex].qstate !== 'L') {
+                select(column.qInterColumnIndex, [rowInfo.original[column.qInterColumnIndex].qElemNumber]);
+              }
+              if (handleOriginal) {
+                handleOriginal();
+              }
+            },
+          };
+        }}
       />
     </div>
   );
@@ -131,6 +173,9 @@ QdtTable.propTypes = {
   cols: PropTypes.array,
   qPage: PropTypes.object,
   style: PropTypes.object,
+  minRows: PropTypes.number,
+  showPageSizeOptions: PropTypes.bool,
+  disableSelections: PropTypes.bool,
 };
 QdtTable.defaultProps = {
   cols: null,
@@ -141,6 +186,9 @@ QdtTable.defaultProps = {
     qHeight: 20,
   },
   style: { height: '100%' },
+  minRows: undefined,
+  showPageSizeOptions: false,
+  disableSelections: false,
 };
 
 export default QdtTable;

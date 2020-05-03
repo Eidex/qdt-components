@@ -12,6 +12,9 @@ import verticalGauge from './verticalGauge';
 import verticalGroupBarchart from './verticalGroupBarchart';
 import rangeArea from './rangeArea';
 import gantt from './gantt';
+import merimekko from './merimekko';
+import pointDistribution from './pointDistribution';
+import pyramid from './pyramid';
 
 export default {
   horizontalBarchart,
@@ -28,4 +31,7 @@ export default {
   verticalGroupBarchart,
   rangeArea,
   gantt,
+  merimekko,
+  pointDistribution,
+  pyramid,
 };

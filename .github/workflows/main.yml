@@ -1,0 +1,22 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+    - 'package.json'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+#     - uses: actions/checkout@v2
+    - name: Azure Pipelines Action
+      uses: Azure/pipelines@v1
+      with:
+        azure-devops-project-url: 'https://dev.azure.com/QlikDemo/qdt-components-ci'
+        azure-pipeline-name: 'qdt-components-ci'
+        azure-devops-token: '${{ secrets.AZURE_DEVOPS_TOKEN }}'
