@@ -33,10 +33,10 @@
     "picasso.js": "^0.27.0",
     "prop-types": "15.7.2",
     "qdt-lui": "^0.1.1",
-    "react-bootstrap-table": "^4.3.1",
-    "react-fontawesome": "^1.6.1",
     "react": "16.11.0",
+    "react-bootstrap-table": "^4.3.1",
     "react-dom": "16.11.0",
+    "react-fontawesome": "^1.6.1",
     "react-table": "^6.11.5",
     "uglifyjs-webpack-plugin": "^2.1.2",
     "ws": "^7.0.0"
@@ -73,7 +73,7 @@
     "style-loader": "1.0.0",
     "url-loader": "2.2.0",
     "webpack": "4.41.2",
-    "webpack-cli": "3.3.9"
+    "webpack-cli": "^3.3.11"
   },
   "scripts": {
     "start": "webpack --watch",
