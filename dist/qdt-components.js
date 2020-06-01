@@ -19033,6 +19033,7 @@ var QdtViz_QdtViz = function QdtViz(_ref) {
       noInteraction = _ref.noInteraction,
       width = _ref.width,
       height = _ref.height,
+      marginLeft = _ref.marginLeft,
       minWidth = _ref.minWidth,
       minHeight = _ref.minHeight,
       exportData = _ref.exportData,
@@ -19239,6 +19240,7 @@ var QdtViz_QdtViz = function QdtViz(_ref) {
     style: {
       width: width,
       height: height,
+      marginLeft: marginLeft,
       minWidth: minWidth,
       minHeight: minHeight
     }
@@ -19275,6 +19277,7 @@ QdtViz_QdtViz.propTypes = {
   noSelections: prop_types_default.a.bool,
   noInteraction: prop_types_default.a.bool,
   width: prop_types_default.a.string,
+  marginLeft: prop_types_default.a.string,
   height: prop_types_default.a.string,
   minWidth: prop_types_default.a.string,
   minHeight: prop_types_default.a.string,
@@ -19299,6 +19302,7 @@ QdtViz_QdtViz.defaultProps = {
   noInteraction: false,
   width: '100%',
   height: '100%',
+  marginLeft: '0px',
   minWidth: 'auto',
   minHeight: 'auto',
   exportData: false,
